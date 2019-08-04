@@ -1,0 +1,19 @@
+As a user I want to record search points with 
+  Postal Code,
+  Distance Range,
+  Minimum Price,
+  Maximum Price, and
+  Category
+which are gonna be used to query craigslist.
+These data are gonna be triggered manually or set in the system to be automatically dispatched.
+
+The answers of these queries are gonna be recorded in a database and each time the query runs, it will recorde the answers.
+But if there is already a PID, the system will only record if either Price, Date or Title has changed.
+
+As a user, I wanna receive an email each time there is a change in the database.
+The email should contain:
+  PID,
+  Title,
+  Images,
+  Maps location,
+  Description
