@@ -8,7 +8,7 @@ const
   }),
   options = {
     name            : "Marine Drive",
-    category        : "apa", // defaults to sss (all)
+    category        : "apa",
     postal          : "V5X0C7",
     searchDistance  : 1,
     minPrice        : '1000',
