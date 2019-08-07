@@ -1,5 +1,11 @@
 // https://www.npmjs.com/package/node-craigslist
 // dotenv
+// mailgun
+
+require("dotenv").config();
+const mailgun = require("mailgun-js");
+const mg = mailgun({apiKey: process.env.APIKEY, domain: process.env.DOMAIN});
+
 
 const
   craigslist = require('node-craigslist'),
@@ -66,13 +72,30 @@ formatPrint = (name, myArray) => {
   );
 }
 
+let msg = [];
 options.forEach(option => {
   client
     .list(option)
     // .then(console.log)
     // .then(answer => answer.map(item => client.details(item)))
     // .then(result => Promise.all(result))
-    .then(final => console.log(formatPrint(option.name, final)))
+    // .then(final => console.log(formatPrint(option.name, final)))
+    .then(result => {
+      msg.push(result);
+      const data = {
+          from: "Mailgun Sandbox <postmaster@sandbox002b4d3efa304a4a92fa6ba15da0460f.mailgun.org>",
+          to: process.env.TO,
+          // cc: process.env.CC,
+          subject: "Hello",
+          text: formatPrint(option.name, msg)
+        };
+        
+        mg.messages().send(data, function (error, body) {
+            console.log("body", body);
+        });
+    });
+
+
     // .list(option, (err, result) => {
     //   if (err) throw err.message;
     //   // console.log("result", result);
