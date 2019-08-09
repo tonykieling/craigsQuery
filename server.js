@@ -2,6 +2,7 @@
 // dotenv
 // mailgun
 
+const dateFormat = require('dateformat')
 require("dotenv").config();
 const mailgun = require("mailgun-js");
 const mg = mailgun({apiKey: process.env.APIKEY, domain: process.env.DOMAIN});
@@ -14,21 +15,29 @@ const
   }),
   options = [
     {
-      name            : "MarineDrive",
-      category        : "apa",
-      postal          : "V5X0C7",
-      searchDistance  : 1,
-      minPrice        : '1000',
-      maxPrice        : '1350'
-    },
-    {
       name            : "Langara",
       category        : "apa",
       postal          : "V5Y2Z9",
       searchDistance  : 1,
       minPrice        : '1000',
       maxPrice        : '1350'
-    }    
+    },
+    {
+      name            : "Okridge",
+      category        : "apa",
+      postal          : "V5Z4H2",
+      searchDistance  : 1,
+      minPrice        : '1000',
+      maxPrice        : '1350'
+    },
+    {
+      name            : "MarineDrive",
+      category        : "apa",
+      postal          : "V5X0C7",
+      searchDistance  : 1,
+      minPrice        : '1000',
+      maxPrice        : '1350'
+    }
   ];
 
 // // query for only one option
@@ -76,7 +85,7 @@ formatPrint = (myArray) => {
     // }
   );
   // console.log("f---", f);
-  return(`@${myArray.name} \n` + f.join(""));
+  return(`@${myArray.name} - total of ${Object.keys(myArray).length - 1} \n` + f.join(""));
 }
 
 myFunc = async () => {
@@ -140,7 +149,7 @@ myFunc = async () => {
     from: "Mailgun Sandbox <postmaster@sandbox002b4d3efa304a4a92fa6ba15da0460f.mailgun.org>",
     to: process.env.TO,
     cc: process.env.CC,
-    subject: "Hello",
+    subject: dateFormat(new Date(), "dddd  -  mmmm dS, yyyy  -  HH:MM"),
     text: kk
   };
   
