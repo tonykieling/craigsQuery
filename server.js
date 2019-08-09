@@ -63,43 +63,58 @@ const
 // }
 
 // myFunc();
-formatPrint = (name, myArray) => {
+formatPrint = (myArray) => {
+  // console.log("myArray", myArray.name);
+  // myArray.forEach(item => console.log("item", item.name));
   const f = myArray.map((item, i) =>
-    `#item${i + 1} => 
-      Title: ${item.title}
-      Price: ${item.price}
-      URL: ${item.url} \n\n`);
-
-  return(
-    `@${name} \n` + f.join("")
+    // console.log("item", item);
+    // if (item.url) {
+      `#item${i + 1} => 
+        Title: ${item.title}
+        Price: ${item.price}
+        URL: ${item.url} \n\n`
+    // }
   );
+  // console.log("f---", f);
+  return(`@${myArray.name} \n` + f.join(""));
 }
 
 myFunc = async () => {
   let arr = [];
   const x = await options.map(async item => {
     const z = await client.list(item);
-    // z[name] = item.name;
+    z["name"] = item.name;
+    // console.log("item", z);
     return z;
     // await console.log("z", z);
   });
   const y = await Promise.all(x);
   // await console.log("---------------------", y);
-  const abc = await y.map(async item => {
-  //   await item.forEach(async newItem => {
-  //     console.log("url", newItem.url);
-  //   });    
-    const result = await item.map(async newItem => {
-      const zed = await client.details(newItem);
-      return zed;
-    });
-    const final = await Promise.all(result);
-    await console.log("final", final);
-    // return final;
+  const final = await y.map(item => {
+    // console.log("item", item);
+    return formatPrint(item);
   });
+  const kk = await Promise.all(final);
+  // await console.log("kk", kk);
+// const final = y.map(item => {
+//   const k = await(item.name, item);
+// });
+
+  // const abc = await y.map(async item => {
+  // //   await item.forEach(async newItem => {
+  // //     console.log("url", newItem.url);
+  // //   });    
+  //   const result = await item.map(async newItem => {
+  //     const zed = await client.details(newItem);
+  //     return zed;
+  //   });
+  //   const final = await Promise.all(result);
+  //   await console.log("final", final);
+  //   // return final;
+  // });
   // const f = await Promise.all(abc);
   // await console.log("****************", f);
-}
+// }
 // myFunc = () => {
 //   options.forEach(option => {
 //     client
@@ -121,18 +136,18 @@ myFunc = async () => {
 //       });
 //   });
 
-  // const data = {
-  //   from: "Mailgun Sandbox <postmaster@sandbox002b4d3efa304a4a92fa6ba15da0460f.mailgun.org>",
-  //   to: process.env.TO,
-  //   // cc: process.env.CC,
-  //   subject: "Hello",
-  //   text: formatPrint(option.name, msg)
-  // };
+  const data = {
+    from: "Mailgun Sandbox <postmaster@sandbox002b4d3efa304a4a92fa6ba15da0460f.mailgun.org>",
+    to: process.env.TO,
+    cc: process.env.CC,
+    subject: "Hello",
+    text: kk
+  };
   
-  // mg.messages().send(data, function (error, body) {
-  //     console.log("body", body);
-  // });
-// }
+  mg.messages().send(data, function (error, body) {
+      console.log("body", body);
+  });
+}
 
 // while(1) {
 //   setTimeout(() => {
