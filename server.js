@@ -75,26 +75,51 @@ formatPrint = (name, myArray) => {
   );
 }
 
-myFunc = () => {
-  options.forEach(option => {
-    client
-      .list(option)
-      .then(answer => answer.map(item => client.details(item)))
-      .then(result => Promise.all(result))
-      .then(final => {
-        const data = {
-          from: "Mailgun Sandbox <postmaster@sandbox002b4d3efa304a4a92fa6ba15da0460f.mailgun.org>",
-          to: process.env.TO,
-          cc: process.env.CC,
-          subject: option.name,
-          text: formatPrint(option.name, final)
-        };
-        
-        mg.messages().send(data, function (error, body) {
-            console.log("body", body);
-        });
-      });
+myFunc = async () => {
+  let arr = [];
+  const x = await options.map(async item => {
+    const z = await client.list(item);
+    // z[name] = item.name;
+    return z;
+    // await console.log("z", z);
   });
+  const y = await Promise.all(x);
+  // await console.log("---------------------", y);
+  const abc = await y.map(async item => {
+  //   await item.forEach(async newItem => {
+  //     console.log("url", newItem.url);
+  //   });    
+    const result = await item.map(async newItem => {
+      const zed = await client.details(newItem);
+      return zed;
+    });
+    const final = await Promise.all(result);
+    await console.log("final", final);
+    // return final;
+  });
+  // const f = await Promise.all(abc);
+  // await console.log("****************", f);
+}
+// myFunc = () => {
+//   options.forEach(option => {
+//     client
+//       .list(option)
+//       .then(answer => answer.map(item => client.details(item)))
+//       .then(result => Promise.all(result))
+//       .then(final => {
+//         const data = {
+//           from: "Mailgun Sandbox <postmaster@sandbox002b4d3efa304a4a92fa6ba15da0460f.mailgun.org>",
+//           to: process.env.TO,
+//           cc: process.env.CC,
+//           subject: option.name,
+//           text: formatPrint(option.name, final)
+//         };
+        
+//         mg.messages().send(data, function (error, body) {
+//             console.log("body", body);
+//         });
+//       });
+//   });
 
   // const data = {
   //   from: "Mailgun Sandbox <postmaster@sandbox002b4d3efa304a4a92fa6ba15da0460f.mailgun.org>",
@@ -107,7 +132,7 @@ myFunc = () => {
   // mg.messages().send(data, function (error, body) {
   //     console.log("body", body);
   // });
-}
+// }
 
 // while(1) {
 //   setTimeout(() => {
