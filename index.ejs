@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>TinyApp</title>
+</head>
+<body>
+
+    <br>
+    <br>
+    <% console.log("urls", urls) %>
+    <% for(const item in urls){ %> 
+  <table >
+    <tr>
+      <td>
+        <%= urls[item].shortURL %> --> <%= urls[item].longURL%>
+        <form action="/urls/<%= urls[item].shortURL%>/delete" method="post">      
+          <button>Delete</button>
+        </form>
+
+        <form action="/urls/<%= urls[item].shortURL%>">
+          <button>Edit</button>
+        </form> 
+      </td>          
+  </table>        
+    <% } %>
+</body>
+</html>

@@ -12,6 +12,7 @@
   "dependencies": {
     "dateformat": "^3.0.3",
     "dotenv": "^8.0.0",
+    "ejs": "^2.6.2",
     "mailgun-js": "^0.22.0",
     "node-craigslist": "^2.1.0"
   }
