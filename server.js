@@ -14,14 +14,14 @@ const
     city : 'vancouver',
   }),
   options = [
-    // {
-    //   name            : "Langara",
-    //   category        : "apa",
-    //   postal          : "V5Y2Z9",
-    //   searchDistance  : 1,
-    //   minPrice        : '1000',
-    //   maxPrice        : '1350'
-    // },
+    {
+      name            : "Langara",
+      category        : "apa",
+      postal          : "V5Y2Z9",
+      searchDistance  : 1,
+      minPrice        : '1000',
+      maxPrice        : '1350'
+    },
     {
       name            : "Okridge",
       category        : "apa",
@@ -55,7 +55,7 @@ sendEmail = (content) => {
   const data = {
     from    : "Mailgun Sandbox <postmaster@sandbox002b4d3efa304a4a92fa6ba15da0460f.mailgun.org>",
     to      : process.env.TO,
-    // cc: process.env.CC,
+    cc: process.env.CC,
     subject : dateFormat(new Date(), "dddd  -  mmmm dS, yyyy  -  HH:MM"),
     html    : content
     // text    : content

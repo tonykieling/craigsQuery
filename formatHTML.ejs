@@ -5,15 +5,23 @@
     <% for(const itemArray of list) { %>        
       <table style="border: black 1px solid">
         <tr>
-          <%= itemArray.name %>
+          <th scope="col">
+            <h2><%= itemArray.name %></h2>
+          </th>
+          <th scope="col"> <h2>Before</h2></th>
+          <th scope="col"> <h2>Now</h2> </th>
         </tr>
         
           <% for(const object in itemArray) { %>
             <% if (object !== "name") { %>
-              <td>
-                <p>PID: <%= itemArray[object].pid %> </p>
-                <p> Price: <%= itemArray[object].price %> </p>
-              </td>
+              <tr style="border: blue 1px solid">
+                <td>.</td>
+                <td>.</td>
+                <td>
+                  <h3><a href="<%= itemArray[object].url %>"><%= itemArray[object].title %> </a></h3>
+                  <h3> Price: <%= itemArray[object].price %> </h3>
+                </td>
+              </tr>
             <% } %>
           <% } %>
 
