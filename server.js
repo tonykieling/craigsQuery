@@ -53,7 +53,7 @@ sendEmail = (content) => {
   const data = {
     from    : "Mailgun Sandbox <postmaster@sandbox002b4d3efa304a4a92fa6ba15da0460f.mailgun.org>",
     to      : process.env.TO,
-    cc      : process.env.CC,
+    // cc      : process.env.CC,
     subject : dateFormat(new Date(), "dddd  -  mmmm dS, yyyy  -  HH:MM"),
     html    : content
     // text    : content
@@ -83,5 +83,12 @@ myFunc = async () => {
 }
 
 
-myFunc();
+setInterval(() => {
+  console.log("running");
+  if ((dateFormat(new Date(), "HH")) > 8 && (dateFormat(new Date(), "HH")) < 20)
+    console.log("time is btw 8 - 20 hr");
+    myFunc();
+}, 30000);
+
+// myFunc();
 
