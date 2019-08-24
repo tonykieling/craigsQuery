@@ -75,7 +75,7 @@ compareLists = (beforeData, list) => {
   console.log("###list", list);
   const checkOne = isEqual(beforeData, list);
   const checkTwo = isEqual(list, beforeData);
-  if ((checkOne === true) && (checkTwo === true)) return("same");
+  if ((checkOne === true) && (checkTwo === true)) return("sameData");
   // console.log("list", list);
   // let areTheSame = true;
   // for(let b in beforeData) {
