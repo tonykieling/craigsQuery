@@ -14,6 +14,10 @@ const list = [
       pid   : 3,
       price : 30
     }
+    // {
+    //   pid   : 4,
+    //   price : 40
+    // }
   ]
 ];
 list[0].name = "Langara";
@@ -36,11 +40,18 @@ const beforeData = [
       pid   : 3,
       price : 30
     }
+    // {
+    //   pid   : 4,
+    //   price : 40
+    // }
   ]
 ];
 beforeData[0].name = "Langara";
 beforeData[1].name = "Oakridge";
 
+
+// this function only checks whether the data before and current are the same
+// if so, the system may not send the email because nothing has changed
 isEqual = (before, current) => {
   for (let b in before)
     for (let c in current)
@@ -52,7 +63,7 @@ isEqual = (before, current) => {
             if (objB.pid === current[c][objC].pid)
               break;
             else
-              if (count === current[c].length)
+              if (count === current[c].length || count === before[b].length)
                 return false;
           }
         }
@@ -64,7 +75,7 @@ compareLists = (beforeData, list) => {
   console.log("###list", list);
   const checkOne = isEqual(beforeData, list);
   const checkTwo = isEqual(list, beforeData);
-  if ((checkOne === true) || (checkTwo === true)) return("same");
+  if ((checkOne === true) && (checkTwo === true)) return("same");
   // console.log("list", list);
   // let areTheSame = true;
   // for(let b in beforeData) {
