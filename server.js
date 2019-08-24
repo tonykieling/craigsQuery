@@ -8,7 +8,7 @@ require("dotenv").config();
 const mailgun = require("mailgun-js");
 const mg = mailgun({apiKey: process.env.APIKEY, domain: process.env.DOMAIN});
 
-let before;
+let beforeData = null;
 const
   craigslist = require('node-craigslist'),
   client = new craigslist.Client({
@@ -28,23 +28,23 @@ const
       searchDistance  : generalOptions.searchDistance,
       minPrice        : generalOptions.minPrice,
       maxPrice        : generalOptions.maxPrice
-    },
-    {
-      name            : "Okridge",
-      postal          : "V5Z4H2",
-      category        : generalOptions.category,
-      searchDistance  : generalOptions.searchDistance,
-      minPrice        : generalOptions.minPrice,
-      maxPrice        : generalOptions.maxPrice
-    },
-    {
-      name            : "MarineDrive",
-      postal          : "V5X0C7",
-      category        : generalOptions.category,
-      searchDistance  : generalOptions.searchDistance,
-      minPrice        : generalOptions.minPrice,
-      maxPrice        : generalOptions.maxPrice
     }
+    // {
+    //   name            : "Okridge",
+    //   postal          : "V5Z4H2",
+    //   category        : generalOptions.category,
+    //   searchDistance  : generalOptions.searchDistance,
+    //   minPrice        : generalOptions.minPrice,
+    //   maxPrice        : generalOptions.maxPrice
+    // },
+    // {
+    //   name            : "MarineDrive",
+    //   postal          : "V5X0C7",
+    //   category        : generalOptions.category,
+    //   searchDistance  : generalOptions.searchDistance,
+    //   minPrice        : generalOptions.minPrice,
+    //   maxPrice        : generalOptions.maxPrice
+    // }
   ];
 
 
@@ -71,15 +71,26 @@ myFunc = async () => {
     return eachItem;
   });
   const list = await Promise.all(getList);
-  
-  await ejs.renderFile("./formatHTML.ejs", {list}, options, function(err, result){
-    if (err)
-      console.log("### err", err);
-    else
-      sendEmail(result);
-  });
 
-  before = list;
+  console.log("list", list);
+  if (!beforeData){
+    // it should call ejs.renderFile
+  } else {
+    // it calls a function to compare list and beforeData
+    
+  }
+
+  // await ejs.renderFile("./formatHTML.ejs", {list, beforeData}, options, function(err, result){
+  //   if (err)
+  //     console.log("### err", err);
+  //   else {
+  //     // sendEmail(result);
+  //     // console.log("BEFORE=================", result);
+  //     console.log(".");
+  //   }
+  // });
+
+  beforeData = [...list];
 }
 
 
@@ -88,7 +99,7 @@ setInterval(() => {
   if ((dateFormat(new Date(), "HH")) > 8 && (dateFormat(new Date(), "HH")) < 20)
     console.log("time is btw 8 - 20 hr");
     myFunc();
-}, 30000);
+}, 2000);
 
 // myFunc();
 
