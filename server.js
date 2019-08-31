@@ -8,9 +8,11 @@ require("dotenv").config();
 const mailgun = require("mailgun-js");
 const mg = mailgun({apiKey: process.env.APIKEY, domain: process.env.DOMAIN});
 
-let countTimesWhithoutSendEmail = 0;    // variable to count how many times the same data and no sending email
+let countTimesWhithoutSendEmail = 1;    // variable to count how many times the same data and no sending email
 const maxTimesWhithoutSendEmail = 4;    // constant to set the maximum times whithout no sending email with same data
-const frequencyCheck            = 4000; // constant that sets the time (in millisecs) the system is query craiglists
+const frequencyCheck            = 4000; // constant that sets the time (in millisecs) so the system is query craiglists
+const gMinPrice                 = 1100;
+const gMaxPrice                 = 1350;
 
 let beforeData = null;
 const
@@ -21,8 +23,8 @@ const
   generalOptions = {
       category        : "apa",
       searchDistance  : 1,
-      minPrice        : '1100',
-      maxPrice        : '1400'
+      minPrice        : gMinPrice,
+      maxPrice        : gMaxPrice
   }
   options = [
     {
@@ -32,23 +34,23 @@ const
       searchDistance  : generalOptions.searchDistance,
       minPrice        : generalOptions.minPrice,
       maxPrice        : generalOptions.maxPrice
+    },
+    {
+      name            : "Oakridge",
+      postal          : "V5Z4H2",
+      category        : generalOptions.category,
+      searchDistance  : generalOptions.searchDistance,
+      minPrice        : generalOptions.minPrice,
+      maxPrice        : generalOptions.maxPrice
+    },
+    {
+      name            : "MarineDrive",
+      postal          : "V5X0C7",
+      category        : generalOptions.category,
+      searchDistance  : generalOptions.searchDistance,
+      minPrice        : generalOptions.minPrice,
+      maxPrice        : generalOptions.maxPrice
     }
-    // {
-    //   name            : "Oakridge",
-    //   postal          : "V5Z4H2",
-    //   category        : generalOptions.category,
-    //   searchDistance  : generalOptions.searchDistance,
-    //   minPrice        : generalOptions.minPrice,
-    //   maxPrice        : generalOptions.maxPrice
-    // },
-    // {
-    //   name            : "MarineDrive",
-    //   postal          : "V5X0C7",
-    //   category        : generalOptions.category,
-    //   searchDistance  : generalOptions.searchDistance,
-    //   minPrice        : generalOptions.minPrice,
-    //   maxPrice        : generalOptions.maxPrice
-    // }
   ];
 
 
@@ -76,12 +78,13 @@ isEqual = (before, current) => {
 
 
 // function to send email using MailGun
-sendEmail = (content) => {
+sendEmail = (content, subject) => {
   const data = {
     from    : "Mailgun Sandbox <postmaster@sandbox002b4d3efa304a4a92fa6ba15da0460f.mailgun.org>",
     to      : process.env.TO,
     // cc      : process.env.CC,
-    subject : dateFormat(new Date(), "dddd  -  mmmm dS, yyyy  -  HH:MM"),
+    subject,
+    // subject : `${dateFormat(new Date(), "@HH:MM - dddd  -  mm/dd/yyyy")} - Price range = $${gMinPrice}-$${gMaxPrice}`,
     html    : content
     // text    : content
   };
@@ -94,13 +97,25 @@ sendEmail = (content) => {
 
 
 // it formats the data to be sent by the email function
-formatDataToBeSent = (list, beforeData) => {
+formatDataToBeSent = (list, beforeData, flag) => {
   ejs.renderFile("./formatHTML.ejs", {list, beforeData}, options, function(err, result){
     if (err)
       console.log("### err", err);
     else {
-      // sendEmail(result);
-      console.log("BEFORE=================", result);
+      let subject = "";
+      switch(flag) {
+        case "first":
+          subject = `${dateFormat(new Date(), "@HH:MM - dddd  -  mm/dd/yyyy")} - Price range = $${gMinPrice}-$${gMaxPrice}`
+          break;
+        case "new":
+          subject = `NEW ${dateFormat(new Date(), "@HH:MM - dddd  -  mm/dd/yyyy")} - Price range = $${gMinPrice}-$${gMaxPrice}`
+          break;
+        case "old":
+          subject = `old ${dateFormat(new Date(), "@HH:MM - dddd  -  mm/dd/yyyy")} - Price range = $${gMinPrice}-$${gMaxPrice}`
+          break;
+      }
+      sendEmail(result, subject);
+      // console.log("BEFORE=================", result);
       // console.log("SENDING_EMAILLLLLLLLLLLLLLLLLLLLLLLLLLL");
     }
   });
@@ -118,24 +133,27 @@ myFunc = async () => {
   // console.log("list", list);
   if (await !beforeData){
     // first time the system runs it send the email with the received data from craigslist
-    console.log("111111111111111111111 FIRST TIME");
-    formatDataToBeSent(list, beforeData);
+    console.log("FIRST TIME");
+    const flag = "first";
+    formatDataToBeSent(list, beforeData, flag);
 
   } else {
     // it calls a function to compare list and beforeData, if there are changes
     // if they are diff, the system send the email
     if (await !isEqual(beforeData, list) || await !isEqual(list, beforeData)){
       console.log("DIFFERENT DATA!!!!!!!!!!!!!!!!!!!!1");
-      formatDataToBeSent(list, beforeData);
+      const flag = "new";
+      formatDataToBeSent(list, beforeData, flag);
     } else {
       console.log("checking how many times with the same data");
       console.log("\t\tcount = ", countTimesWhithoutSendEmail);
-      if ((countTimesWhithoutSendEmail += 1) >= maxTimesWhithoutSendEmail) {
+      if ((countTimesWhithoutSendEmail += 1) > maxTimesWhithoutSendEmail) {
         // if the maximum timeswhithout sending email is reached,
         // should set zero to its variable and send the email
-        console.log("MAXIMUM TIMES NO SENDING REACHED, LET'S SEND ANYWAYS GOGOGOGO");
-        countTimesWhithoutSendEmail = 0;
-        formatDataToBeSent(list, beforeData);
+        console.log("MAXIMUM TIMES NO SENDING REACHED, LET'S SEND THE EMAIL ANYWAYS GOGOGOGO");
+        countTimesWhithoutSendEmail = 1;
+        const flag = "old";
+        formatDataToBeSent(list, beforeData, flag);
       }
     }
   }
@@ -144,10 +162,12 @@ myFunc = async () => {
 }
 
 
+console.log(`\n# running @${dateFormat(new Date(), "HH:MM")}`);
+myFunc();
 
 // this is the time controller of the application
 setInterval(() => {
-  console.log("running");
+  console.log(`\n# running @${dateFormat(new Date(), "HH:MM")}`);
   if ((dateFormat(new Date(), "HH")) > 8 && (dateFormat(new Date(), "HH")) < 20)
     console.log("time is btw 8 - 20 hr");
     myFunc();
