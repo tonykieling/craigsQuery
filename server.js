@@ -10,7 +10,7 @@ const mg = mailgun({apiKey: process.env.APIKEY, domain: process.env.DOMAIN});
 
 let countTimesWhithoutSendEmail = 1;    // variable to count how many times the same data and no sending email
 const maxTimesWhithoutSendEmail = 4;    // constant to set the maximum times whithout no sending email with same data
-const frequencyCheck            = 4000; // constant that sets the time (in millisecs) so the system is query craiglists
+const frequencyCheck            = 30 * 60 * 1000; // constant that sets the time (in millisecs) so the system is query craiglists
 const gMinPrice                 = 1100;
 const gMaxPrice                 = 1350;
 
