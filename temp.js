@@ -12,12 +12,12 @@ const list = [
   [
     {
       pid   : 3,
-      price : 30
+      price : 300
+    },
+    {
+      pid   : 5,
+      price : 500
     }
-    // {
-    //   pid   : 4,
-    //   price : 40
-    // }
   ]
 ];
 list[0].name = "Langara";
@@ -39,11 +39,11 @@ const beforeData = [
     {
       pid   : 3,
       price : 30
+    },
+    {
+      pid   : 4,
+      price : 40
     }
-    // {
-    //   pid   : 4,
-    //   price : 40
-    // }
   ]
 ];
 beforeData[0].name = "Langara";
@@ -55,35 +55,47 @@ beforeData[1].name = "Oakridge";
 isEqual = (before, current) => {
   let noChange = true;
   for (let c of current) {
-    console.log("### c", c);
+    // console.log("### c", c);
     for (let b of before) {
       if (b.name === c.name) {
-        console.log("### b", b);
+        // console.log("### b", b);
         // console.log("c.name", c.name);
         // console.log("c.length", c.length);
         for (let objC of c) {
-          console.log("objc", objC);
-          let count = 0;
+          // console.log("objc", objC);
+          let countC = 0;
+          let countB = 0;
           for (let objB of b) {
-            console.log("objb", objB);
+            countB += 1;
+            // console.log("objb", objB);
             // console.log("b.length", b.length);
-            // count += 1;
+            // countC += 1;
             if (objB.pid === objC.pid) {
+              objB.flag = true;
               if (objB.price !== objC.price) {
                 objC.modify = "Changed";
                 noChange = false;
                 // console.log("***difffff")
               }
-              console.log("=== same pid-BREAK");
+              // console.log("=== same pid-BREAK");
               break;
             } else {
-              count += 1;
-              console.log("+ count", count, "  - b.length", b.length, "  - c.length", c.length);
-              if (count >= b.length) {
+              countC += 1;
+              if (countC === b.length) {
                 noChange = false;
                 objC.modify = "New";
+                break;
               }
             }
+          }
+        }
+        for (let objB of b) {
+          // console.log("=> objB", objB);
+          if (!objB.flag) {
+            // console.log("DELETEDDDDDDDDDDD");
+            objB.modify = "Deleted";
+            noChange = false;
+            c.push(objB);
           }
         }
       }
@@ -94,7 +106,7 @@ isEqual = (before, current) => {
 
 compareLists = (beforeData, list) => {
   console.log("###beforeData", beforeData);
-  console.log("###list", list);
+  console.log("###current", list);
   return isEqual(beforeData, list);
   // const checkOne = isEqual(beforeData, list);
   // const checkTwo = isEqual(list, beforeData);
