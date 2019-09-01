@@ -13,11 +13,11 @@ const list = [
     {
       pid   : 3,
       price : 30
-    },
-    {
-      pid   : 4,
-      price : 40
     }
+    // {
+    //   pid   : 4,
+    //   price : 40
+    // }
   ]
 ];
 list[0].name = "Langara";
@@ -54,36 +54,41 @@ beforeData[1].name = "Oakridge";
 // if so, the system may not send the email because nothing has changed
 isEqual = (before, current) => {
   let noChange = true;
-  for (let c of current)
+  for (let c of current) {
+    console.log("### c", c);
     for (let b of before) {
       if (b.name === c.name) {
         console.log("### b", b);
-        console.log("### c", c);
         // console.log("c.name", c.name);
         // console.log("c.length", c.length);
         for (let objC of c) {
+          console.log("objc", objC);
           let count = 0;
           for (let objB of b) {
-            console.log("OBJb", objB);
-            console.log("OBJc", objC);
+            console.log("objb", objB);
             // console.log("b.length", b.length);
-            count += 1;
+            // count += 1;
             if (objB.pid === objC.pid) {
               if (objB.price !== objC.price) {
                 objC.modify = "Changed";
                 noChange = false;
-                break;
+                // console.log("***difffff")
               }
-            } else if (count >= b.length) {
-              console.log("NEW C", objC.pid);
-              console.log("NEW B", objB.pid);
-              noChange = false;
-              objC.modify = "New";
+              console.log("=== same pid-BREAK");
+              break;
+            } else {
+              count += 1;
+              console.log("+ count", count, "  - b.length", b.length, "  - c.length", c.length);
+              if (count >= b.length) {
+                noChange = false;
+                objC.modify = "New";
+              }
             }
           }
         }
       }
     }
+  }
   return(noChange || current);
 }
 
