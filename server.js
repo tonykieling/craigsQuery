@@ -10,7 +10,7 @@ const mg = mailgun({apiKey: process.env.APIKEY, domain: process.env.DOMAIN});
 
 let countTimesWhithoutSendEmail = 1;    // variable to count how many times the same data and no sending email
 const maxTimesWhithoutSendEmail = 4;    // constant to set the maximum times whithout no sending email with same data
-const frequencyCheck            = 30 * 60 * 1000; // constant that sets the time (in millisecs) so the system is query craiglists
+const frequencyCheck            = 3000; // constant that sets the time (in millisecs) so the system is query craiglists
 const gMinPrice                 = 1100;
 const gMaxPrice                 = 1350;
 
@@ -42,15 +42,15 @@ const
       searchDistance  : generalOptions.searchDistance,
       minPrice        : generalOptions.minPrice,
       maxPrice        : generalOptions.maxPrice
-    },
-    {
-      name            : "MarineDrive",
-      postal          : "V5X0C7",
-      category        : generalOptions.category,
-      searchDistance  : generalOptions.searchDistance,
-      minPrice        : generalOptions.minPrice,
-      maxPrice        : generalOptions.maxPrice
     }
+    // {
+    //   name            : "MarineDrive",
+    //   postal          : "V5X0C7",
+    //   category        : generalOptions.category,
+    //   searchDistance  : generalOptions.searchDistance,
+    //   minPrice        : generalOptions.minPrice,
+    //   maxPrice        : generalOptions.maxPrice
+    // }
   ];
 
 
@@ -98,20 +98,21 @@ sendEmail = (content, subject) => {
 
 // it formats the data to be sent by the email function
 formatDataToBeSent = (list, beforeData, flag) => {
-  ejs.renderFile("./formatHTML.ejs", {list, beforeData}, options, function(err, result){
+  ejs.renderFile("./formatHTML.ejs", {list, beforeData, gMinPrice, gMaxPrice}, options, function(err, result){
     if (err)
       console.log("### err", err);
     else {
       let subject = "";
       switch(flag) {
         case "first":
-          subject = `${dateFormat(new Date(), "@HH:MM - dddd  -  mm/dd/yyyy")} - Price range = $${gMinPrice}-$${gMaxPrice}`
+          subject = `${dateFormat(new Date(), "@HH:MM - dddd  -  mm/dd/yyyy")}`;
+          // subject = `${dateFormat(new Date(), "@HH:MM - dddd  -  mm/dd/yyyy")} - Price range = $${gMinPrice}-$${gMaxPrice}`
           break;
         case "new":
-          subject = `NEW ${dateFormat(new Date(), "@HH:MM - dddd  -  mm/dd/yyyy")} - Price range = $${gMinPrice}-$${gMaxPrice}`
+          subject = `NEW ${dateFormat(new Date(), "@HH:MM - dddd  -  mm/dd/yyyy")}`;
           break;
-        case "old":
-          subject = `old ${dateFormat(new Date(), "@HH:MM - dddd  -  mm/dd/yyyy")} - Price range = $${gMinPrice}-$${gMaxPrice}`
+        case "same":
+          subject = `same ${dateFormat(new Date(), "@HH:MM - dddd  -  mm/dd/yyyy")}`;
           break;
       }
       sendEmail(result, subject);
@@ -135,6 +136,7 @@ myFunc = async () => {
     // first time the system runs it send the email with the received data from craigslist
     console.log("FIRST TIME");
     const flag = "first";
+    beforeData = null;
     formatDataToBeSent(list, beforeData, flag);
 
   } else {
@@ -150,9 +152,10 @@ myFunc = async () => {
       if ((countTimesWhithoutSendEmail += 1) > maxTimesWhithoutSendEmail) {
         // if the maximum timeswhithout sending email is reached,
         // should set zero to its variable and send the email
-        console.log("MAXIMUM TIMES NO SENDING REACHED, LET'S SEND THE EMAIL ANYWAYS GOGOGOGO");
+        console.log("+++ MAXIMUM TIMES NO SENDING REACHED, LET'S SEND THE EMAIL ANYWAYS GOGOGOGO");
         countTimesWhithoutSendEmail = 1;
-        const flag = "old";
+        const flag = "same";
+        beforeData = null;
         formatDataToBeSent(list, beforeData, flag);
       }
     }

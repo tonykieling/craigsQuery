@@ -13,11 +13,11 @@ const list = [
     {
       pid   : 3,
       price : 30
+    },
+    {
+      pid   : 4,
+      price : 40
     }
-    // {
-    //   pid   : 4,
-    //   price : 40
-    // }
   ]
 ];
 list[0].name = "Langara";
@@ -53,29 +53,48 @@ beforeData[1].name = "Oakridge";
 // this function only checks whether the data before and current are the same
 // if so, the system may not send the email because nothing has changed
 isEqual = (before, current) => {
-  for (let b in before)
-    for (let c in current)
-      if (current[c].name === before[b].name)
-        for (let objB of before[b]) {
+  let noChange = true;
+  for (let c of current)
+    for (let b of before) {
+      if (b.name === c.name) {
+        console.log("### b", b);
+        console.log("### c", c);
+        // console.log("c.name", c.name);
+        // console.log("c.length", c.length);
+        for (let objC of c) {
           let count = 0;
-          for (let objC in current[c]) {
+          for (let objB of b) {
+            console.log("OBJb", objB);
+            console.log("OBJc", objC);
+            // console.log("b.length", b.length);
             count += 1;
-            if (objB.pid === current[c][objC].pid)
-              break;
-            else
-              if (count === current[c].length || count === before[b].length)
-                return false;
+            if (objB.pid === objC.pid) {
+              if (objB.price !== objC.price) {
+                objC.modify = "Changed";
+                noChange = false;
+                break;
+              }
+            } else if (count >= b.length) {
+              console.log("NEW C", objC.pid);
+              console.log("NEW B", objB.pid);
+              noChange = false;
+              objC.modify = "New";
+            }
           }
         }
-  return true;
+      }
+    }
+  return(noChange || current);
 }
 
 compareLists = (beforeData, list) => {
   console.log("###beforeData", beforeData);
   console.log("###list", list);
-  const checkOne = isEqual(beforeData, list);
-  const checkTwo = isEqual(list, beforeData);
-  if ((checkOne === true) && (checkTwo === true)) return("sameData");
+  return isEqual(beforeData, list);
+  // const checkOne = isEqual(beforeData, list);
+  // const checkTwo = isEqual(list, beforeData);
+  // if ((checkOne === true) && (checkTwo === true)) return("sameData");
+  if ((checkOne === true) ) return("sameData");
   // console.log("list", list);
   // let areTheSame = true;
   // for(let b in beforeData) {
