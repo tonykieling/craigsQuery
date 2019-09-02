@@ -10,8 +10,8 @@ const mg = mailgun({apiKey: process.env.APIKEY, domain: process.env.DOMAIN});
 
 let countTimesWhithoutSendEmail = 1;    // variable to count how many times the same data and no sending email
 const maxTimesWhithoutSendEmail = 4;    // constant to set the maximum times whithout no sending email with same data
-// const frequencyCheck            = 15 * 60 * 1000; // constant that sets the time (in millisecs) so the system is query craiglists
-const frequencyCheck            = 4000; // constant that sets the time (in millisecs) so the system is query craiglists
+const frequencyCheck            = 15 * 60 * 1000; // constant that sets the time (in millisecs) so the system is query craiglists
+// const frequencyCheck            = 10000; // constant that sets the time (in millisecs) so the system is query craiglists
 const gMinPrice                 = 1100;
 const gMaxPrice                 = 1350;
 
@@ -58,22 +58,45 @@ const
 
 // this function only checks whether the data before and current are the same
 // if so, the system may not send the email because nothing has changed
-isEqual = (before, current) => {
-  for (let b in before)
-    for (let c in current)
-      if (current[c].name === before[b].name)
-        for (let objB of before[b]) {
-          let count = 0;
-          for (let objC in current[c]) {
-            count += 1;
-            if (objB.pid === current[c][objC].pid)
+hasChange = (before, current) => {
+  // console.log(" inside hasChange")
+  let someChange = false;
+  let internalChange = false;
+  for (let c of current)
+    for (let b of before)
+      if (b.name === c.name) {
+        for (let objC of c) {
+          let countC = 0;
+          for (let objB of b) {
+            if (objB.pid === objC.pid) {
+              objB.flag = true;
+              if (objB.price !== objC.price) {
+                objC.modify     = "Changed";
+                someChange       = true;
+                internalChange  = true;
+              }
               break;
-            else
-              if (count === current[c].length || count === before[b].length)
-                return false;
+            } else {
+              countC += 1;
+              if (countC === b.length) {
+                someChange       = true;
+                objC.modify     = "New";
+                internalChange  = true;
+                break;
+              }
+            }
           }
         }
-  return true;
+        if (internalChange)
+          for (let objB of b)
+            if (!objB.flag) {
+              objB.modify = "Deleted";
+              someChange   = true;
+              c.push(objB);
+            }
+      }
+  // console.log("returning from hasChange: ", someChange && current);
+  return(someChange && current);
 }
 
 
@@ -98,8 +121,9 @@ sendEmail = (content, subject) => {
 
 
 // it formats the data to be sent by the email function
-formatDataToBeSent = (list, beforeData, flag) => {
-  ejs.renderFile("./formatHTML.ejs", {list, beforeData, gMinPrice, gMaxPrice}, options, function(err, result){
+formatDataToBeSent = (list, flag) => {
+  // console.log(" inside formatDataToBeSent");
+  ejs.renderFile("./formatHTML.ejs", {list, gMinPrice, gMaxPrice}, options, function(err, result){
     if (err)
       console.log("### err", err);
     else {
@@ -125,43 +149,45 @@ formatDataToBeSent = (list, beforeData, flag) => {
 
 // main function of the system
 myFunc = async () => {
+  // console.log(" getting list");
   const getList = await options.map(async item => {
     const eachItem = await client.list(item);
     eachItem["name"] = item.name;
     return eachItem;
   });
   const list = await Promise.all(getList);
+  // await console.log(" list", list.length);
 
-  // console.log("list", list);
+
   if (await !beforeData){
     // first time the system runs it send the email with the received data from craigslist
     console.log("FIRST TIME");
     const flag = "first";
-    beforeData = null;
-    formatDataToBeSent(list, beforeData, flag);
+    formatDataToBeSent(list, flag);
 
   } else {
     // it calls a function to compare list and beforeData, if there are changes
     // if they are diff, the system send the email
-    if (await !isEqual(beforeData, list) || await !isEqual(list, beforeData)){
+    const queryToHasChange = await hasChange(beforeData, list);
+    if (queryToHasChange){
       console.log("DIFFERENT DATA!!!!!!!!!!!!!!!!!!!!1");
       const flag = "new";
-      formatDataToBeSent(list, beforeData, flag);
+      formatDataToBeSent(list, flag);
     } else {
       console.log("checking how many times with the same data");
       console.log("\t\tcount = ", countTimesWhithoutSendEmail);
       if ((countTimesWhithoutSendEmail += 1) > maxTimesWhithoutSendEmail) {
         // if the maximum timeswhithout sending email is reached,
         // should set zero to its variable and send the email
-        console.log("+++ MAXIMUM TIMES NO SENDING REACHED, LET'S SEND THE EMAIL ANYWAYS GOGOGOGO");
+        console.log("+++ MAXIMUM TIMES NO SENDING HAS BEEN REACHED, LET'S SEND THE EMAIL ANYWAYS GOGOGOGO");
         countTimesWhithoutSendEmail = 1;
         const flag = "same";
-        beforeData = null;
-        formatDataToBeSent(list, beforeData, flag);
+        formatDataToBeSent(list, flag);
       }
     }
   }
 
+  beforeData = null;
   beforeData = [...list];
 }
 

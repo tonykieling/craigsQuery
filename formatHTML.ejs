@@ -21,7 +21,9 @@
     p {
       color: blue
     }
-    tr:nth-child(even) {background-color: lightgray;}
+    tr:nth-child(even) {
+      background-color: lightgray
+    }
   </style>
 </head>
 
@@ -46,10 +48,14 @@
                       <h3>Item: <%= Number(objk) + 1 %></h3>
                     </td>
                     <td colspan="1" class="bodySetting">
-
                       
-
-
+                      <% if (itemArray[objk].modify === "Changed") { %>
+                        <h3 style="color: orange">Changed</h3>
+                      <% } else if (itemArray[objk].modify === "Deleted") { %>
+                        <h3 style="color: red">Deleted</h3>
+                      <% } else if (itemArray[objk].modify === "New") { %>
+                        <h3 style="color: green">NEW</h3>
+                      <% } %>
 
                       <h3>PID: <%= itemArray[objk].pid %></h3>
                     </td>
