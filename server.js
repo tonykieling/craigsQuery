@@ -10,7 +10,8 @@ const mg = mailgun({apiKey: process.env.APIKEY, domain: process.env.DOMAIN});
 
 let countTimesWhithoutSendEmail = 1;    // variable to count how many times the same data and no sending email
 const maxTimesWhithoutSendEmail = 4;    // constant to set the maximum times whithout no sending email with same data
-const frequencyCheck            = 3000; // constant that sets the time (in millisecs) so the system is query craiglists
+// const frequencyCheck            = 15 * 60 * 1000; // constant that sets the time (in millisecs) so the system is query craiglists
+const frequencyCheck            = 4000; // constant that sets the time (in millisecs) so the system is query craiglists
 const gMinPrice                 = 1100;
 const gMaxPrice                 = 1350;
 
@@ -42,15 +43,15 @@ const
       searchDistance  : generalOptions.searchDistance,
       minPrice        : generalOptions.minPrice,
       maxPrice        : generalOptions.maxPrice
+    },
+    {
+      name            : "MarineDrive",
+      postal          : "V5X0C7",
+      category        : generalOptions.category,
+      searchDistance  : generalOptions.searchDistance,
+      minPrice        : generalOptions.minPrice,
+      maxPrice        : generalOptions.maxPrice
     }
-    // {
-    //   name            : "MarineDrive",
-    //   postal          : "V5X0C7",
-    //   category        : generalOptions.category,
-    //   searchDistance  : generalOptions.searchDistance,
-    //   minPrice        : generalOptions.minPrice,
-    //   maxPrice        : generalOptions.maxPrice
-    // }
   ];
 
 
@@ -82,7 +83,7 @@ sendEmail = (content, subject) => {
   const data = {
     from    : "Mailgun Sandbox <postmaster@sandbox002b4d3efa304a4a92fa6ba15da0460f.mailgun.org>",
     to      : process.env.TO,
-    // cc      : process.env.CC,
+    cc      : process.env.CC,
     subject,
     // subject : `${dateFormat(new Date(), "@HH:MM - dddd  -  mm/dd/yyyy")} - Price range = $${gMinPrice}-$${gMaxPrice}`,
     html    : content
