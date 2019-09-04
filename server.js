@@ -9,7 +9,7 @@ const mailgun = require("mailgun-js");
 const mg = mailgun({apiKey: process.env.APIKEY, domain: process.env.DOMAIN});
 
 let countTimesWhithoutSendEmail = 1;    // variable to count how many times the same data and no sending email
-const maxTimesWhithoutSendEmail = 4;    // constant to set the maximum times whithout no sending email with same data
+const maxTimesWhithoutSendEmail = 12;    // constant to set the maximum times whithout no sending email with same data
 const frequencyCheck            = 15 * 60 * 1000; // constant that sets the time (in millisecs) so the system is query craiglists
 // const frequencyCheck            = 10000; // constant that sets the time (in millisecs) so the system is query craiglists
 const gMinPrice                 = 1100;
@@ -106,7 +106,7 @@ sendEmail = (content, subject) => {
   const data = {
     from    : "Mailgun Sandbox <postmaster@sandbox002b4d3efa304a4a92fa6ba15da0460f.mailgun.org>",
     to      : process.env.TO,
-    cc      : process.env.CC,
+    // cc      : process.env.CC,
     subject,
     // subject : `${dateFormat(new Date(), "@HH:MM - dddd  -  mm/dd/yyyy")} - Price range = $${gMinPrice}-$${gMaxPrice}`,
     html    : content
@@ -170,13 +170,20 @@ myFunc = async () => {
     // if they are diff, the system send the email
     const queryToHasChange = await hasChange(beforeData, list);
     if (queryToHasChange){
-      console.log("DIFFERENT DATA!!!!!!!!!!!!!!!!!!!!1");
+      console.log("DIFFERENT DATA!!!!!!!!!!!!!!!!!!!!");
       const flag = "new";
       formatDataToBeSent(list, flag);
+    } else if (((dateFormat(new Date(), "HH")) === 8  && (dateFormat(new Date(), "MM")) === 0) ||
+              (((dateFormat(new Date(), "HH")) === 13 && (dateFormat(new Date(), "HH")) === 0)) ||
+              (((dateFormat(new Date(), "HH")) === 19 && (dateFormat(new Date(), "HH")) === 0))) {
+      console.log("+++ GOGOGOGO @", new Date(), "HH:MM");
+      countTimesWhithoutSendEmail = 1;
+      const flag = "same";
+      formatDataToBeSent(list, flag);        
     } else {
       console.log("checking how many times with the same data");
       console.log("\t\tcount = ", countTimesWhithoutSendEmail);
-      if ((countTimesWhithoutSendEmail += 1) > maxTimesWhithoutSendEmail) {
+      if (((countTimesWhithoutSendEmail += 1) > maxTimesWhithoutSendEmail) || ) {
         // if the maximum timeswhithout sending email is reached,
         // should set zero to its variable and send the email
         console.log("+++ MAXIMUM TIMES NO SENDING HAS BEEN REACHED, LET'S SEND THE EMAIL ANYWAYS GOGOGOGO");
