@@ -8,9 +8,9 @@ require("dotenv").config();
 const mailgun = require("mailgun-js");
 const mg = mailgun({apiKey: process.env.APIKEY, domain: process.env.DOMAIN});
 
-let countTimesWhithoutSendEmail = 1;    // variable to count how many times the same data and no sending email
-const maxTimesWhithoutSendEmail = 12;    // constant to set the maximum times whithout no sending email with same data
-const frequencyCheck            = 15 * 60 * 1000; // constant that sets the time (in millisecs) so the system is query craiglists
+// let countTimesWhithoutSendEmail = 1;    // variable to count how many times the same data and no sending email
+// const maxTimesWhithoutSendEmail = 12;    // constant to set the maximum times whithout no sending email with same data
+// const frequencyCheck            = 15 * 60 * 1000; // constant that sets the time (in millisecs) so the system is query craiglists
 // const frequencyCheck            = 10000; // constant that sets the time (in millisecs) so the system is query craiglists
 const gMinPrice                 = 1100;
 const gMaxPrice                 = 1350;
@@ -139,6 +139,9 @@ formatDataToBeSent = (list, flag) => {
         case "same":
           subject = `same ${dateFormat(new Date(), "@HH:MM - dddd  -  mm/dd/yyyy")}`;
           break;
+        default:
+          subject = flag;
+          break;
       }
       sendEmail(result, subject);
       // console.log("BEFORE=================", result);
@@ -149,7 +152,9 @@ formatDataToBeSent = (list, flag) => {
 
 // main function of the system
 myFunc = async () => {
-  // console.log(" getting list");
+  console.log(" getting list");
+  // return;
+
   const getList = await options.map(async item => {
     const eachItem = await client.list(item);
     eachItem["name"] = item.name;
@@ -168,30 +173,31 @@ myFunc = async () => {
   } else {
     // it calls a function to compare list and beforeData, if there are changes
     // if they are diff, the system send the email
+    const cTime = new Date();
     const queryToHasChange = await hasChange(beforeData, list);
     if (queryToHasChange){
       console.log("DIFFERENT DATA!!!!!!!!!!!!!!!!!!!!");
       const flag = "new";
       formatDataToBeSent(list, flag);
-    } else if (((dateFormat(new Date(), "HH")) === 8  && (dateFormat(new Date(), "MM")) === 0) ||
-              (((dateFormat(new Date(), "HH")) === 13 && (dateFormat(new Date(), "HH")) === 0)) ||
-              (((dateFormat(new Date(), "HH")) === 19 && (dateFormat(new Date(), "HH")) === 0))) {
-      console.log("+++ GOGOGOGO @", new Date(), "HH:MM");
-      countTimesWhithoutSendEmail = 1;
-      const flag = "same";
+    } else if (((dateFormat(cTime, "HH")) === 8  && (dateFormat(cTime, "MM")) === 0) ||
+              (((dateFormat(cTime, "HH")) === 17 && (dateFormat(cTime, "MM")) === 0))) {
+      console.log("+++ GOGOGOGO @", cTime, "HH:MM");
+      // countTimesWhithoutSendEmail = 1;
+      const flag = "same" + dateFormat(cTime, "HH:MM");
       formatDataToBeSent(list, flag);        
-    } else {
-      console.log("checking how many times with the same data");
-      console.log("\t\tcount = ", countTimesWhithoutSendEmail);
-      if (((countTimesWhithoutSendEmail += 1) > maxTimesWhithoutSendEmail) || ) {
-        // if the maximum timeswhithout sending email is reached,
-        // should set zero to its variable and send the email
-        console.log("+++ MAXIMUM TIMES NO SENDING HAS BEEN REACHED, LET'S SEND THE EMAIL ANYWAYS GOGOGOGO");
-        countTimesWhithoutSendEmail = 1;
-        const flag = "same";
-        formatDataToBeSent(list, flag);
-      }
     }
+    // else {
+    //   console.log("checking how many times with the same data");
+    //   console.log("\t\tcount = ", countTimesWhithoutSendEmail);
+    //   if (((countTimesWhithoutSendEmail += 1) > maxTimesWhithoutSendEmail) ) {
+    //     // if the maximum timeswhithout sending email is reached,
+    //     // should set zero to its variable and send the email
+    //     console.log("+++ MAXIMUM TIMES NO SENDING HAS BEEN REACHED, LET'S SEND THE EMAIL ANYWAYS GOGOGOGO");
+    //     countTimesWhithoutSendEmail = 1;
+    //     const flag = "same";
+    //     formatDataToBeSent(list, flag);
+    //   }
+    // }
   }
 
   beforeData = null;
@@ -199,14 +205,58 @@ myFunc = async () => {
 }
 
 
-console.log(`\n# running @${dateFormat(new Date(), "HH:MM")}`);
+
+mainController = () => {
+  // this is the time controller of the application
+  clearInterval(timeOutObj);
+  let interval = 1000 * 60 * 10;    ////////////// 15
+  setInterval(() => {
+    const currentTime = new Date();
+    console.log(`\n# running @${dateFormat(currentTime, "HH:MM:ss")}`);    /////////////////////////   "HH:MM"
+    if ((dateFormat(currentTime, "HH")) > 6 &&
+        (dateFormat(currentTime, "HH") < 20))
+      interval = 1000 * 60 * 60;
+    else
+      interval = 1000 * 60 * 15;
+
+    if ((dateFormat(currentTime, "MM") % 15) === 0)   ////////// "MM"  15
+      myFunc();
+  }, interval);
+}
+
+
+
+
+// this is the function to round the timer to multiple of 15
+// it's gonna be executed only once
+timeOutObj = () => {
+  console.log("waiting for 3333333333")
+  clearInterval(fTimeOut);
+  setInterval(() => {
+    const cTime = new Date();
+    console.log(`\n# 2222222222222running @${dateFormat(cTime, "HH:MM:ss")}`);    ////////////////// "MM"
+    if ((dateFormat(cTime, "MM") % 3) === 0)  ///////////////////////// "MM", 15
+    mainController();
+  }, (1000 * 60));
+}
+
+
+
+// function to get 0 seconds in order to start at zero
+fTimeOut = () => {
+  console.log("waiting for zero");
+  setInterval(() => {
+    console.log(dateFormat(new Date(), "ss"));
+    if ((dateFormat(new Date(), "ss")) === "00") {
+      console.log("00000000000000", dateFormat(new Date(), "HH:MM"));
+      timeOutObj();
+    }
+  }, 1000);
+}
+
+
+// it runs at the very beggining to send the first email
+// it runs only once
+console.log(`\n# 1111111111running @${dateFormat(new Date(), "HH:MM:ss")}`);
 myFunc();
-
-// this is the time controller of the application
-setInterval(() => {
-  console.log(`\n# running @${dateFormat(new Date(), "HH:MM")}`);
-  if ((dateFormat(new Date(), "HH")) > 8 && (dateFormat(new Date(), "HH")) < 20)
-    console.log("time is btw 8 - 20 hr");
-    myFunc();
-}, frequencyCheck);
-
+fTimeOut();
