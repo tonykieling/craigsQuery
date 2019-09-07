@@ -164,11 +164,9 @@ mainFunc = async () => {
   const getList = await options.map(async item => {
     const eachItem = await client.list(item);
     eachItem["name"] = item.name;
-    console.log("eachItem.name", eachItem.name);
     return eachItem;
   });
   const list = await Promise.all(getList);
-  console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
 
   if (await !beforeData){
     // first time the system runs it send the email with the received data from craigslist
