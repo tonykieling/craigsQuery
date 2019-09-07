@@ -153,7 +153,7 @@ formatDataToBeSent = (list, flag) => {
 // main function of the system
 myFunc = async () => {
   console.log(" getting list");
-  return;
+  // return;
 
   const getList = await options.map(async item => {
     const eachItem = await client.list(item);
@@ -208,9 +208,8 @@ myFunc = async () => {
 
 mainController = () => {
   // this is the time controller of the application
-  console.log("@inside mainController");
-  clearInterval(secondT);
-  let interval = 1000 * 60;    ////////////// 15
+  clearInterval(timeOutObj);
+  let interval = 1000 * 60 * 10;    ////////////// 15
   setInterval(() => {
     const currentTime = new Date();
     console.log(`\n# running @${dateFormat(currentTime, "HH:MM:ss")}`);    /////////////////////////   "HH:MM"
@@ -220,39 +219,37 @@ mainController = () => {
     else
       interval = 1000 * 60 * 15;
 
-    if ((dateFormat(currentTime, "MM") % 2) === 0)   ////////// "MM"  15
-      console.log("calling myFunc()!!!!!!!!!!!!!!!!!!!!!")
-      // myFunc();
+    if ((dateFormat(currentTime, "MM") % 15) === 0)   ////////// "MM"  15
+      myFunc();
   }, interval);
 }
 
 
 
 
-// this is the function to round the timer to multiple of 15 minutes
+// this is the function to round the timer to multiple of 15
 // it's gonna be executed only once
-fFifteen = () => {
-  console.log("@inside fFitteen")
-  clearInterval(firstT);
-  secondT = setInterval(() => {
-    const cTime = Number(dateFormat(new Date(), "ss"));
-    console.log(`\n#15sec running @${cTime}`);    ////////////////// "MM"
-    if ((cTime % 15) === 0)  ///////////////////////// "MM", 15
-      mainController();
-  }, (1000));
+timeOutObj = () => {
+  console.log("waiting for 3333333333")
+  clearInterval(fTimeOut);
+  setInterval(() => {
+    const cTime = new Date();
+    console.log(`\n# 2222222222222running @${dateFormat(cTime, "HH:MM:ss")}`);    ////////////////// "MM"
+    if ((dateFormat(cTime, "MM") % 3) === 0)  ///////////////////////// "MM", 15
+    mainController();
+  }, (1000 * 60));
 }
 
 
 
 // function to get 0 seconds in order to start at zero
-fZero = () => {
-  console.log("@inside fZero");
-  firstT = setInterval(() => {
-    const t = Number(dateFormat(new Date(), "ss"));
-    console.log("time = ", t);
-    if (t === 0) {
-      console.log("00000000000000", dateFormat(t, "HH:MM"));
-      fFifteen();
+fTimeOut = () => {
+  console.log("waiting for zero");
+  setInterval(() => {
+    console.log(dateFormat(new Date(), "ss"));
+    if ((dateFormat(new Date(), "ss")) === "00") {
+      console.log("00000000000000", dateFormat(new Date(), "HH:MM"));
+      timeOutObj();
     }
   }, 1000);
 }
@@ -262,6 +259,4 @@ fZero = () => {
 // it runs only once
 console.log(`\n# 1111111111running @${dateFormat(new Date(), "HH:MM:ss")}`);
 myFunc();
-let firstT  = null;
-let secondT = null;
-fZero();
+fTimeOut();
