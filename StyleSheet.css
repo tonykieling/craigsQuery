@@ -1,16 +1,22 @@
 .tableSetting {
   border: black 1px solid;
-  margin: 0;
+  border-spacing: 0;
 }
-
 .bodySetting {
-  border: red 1px solid;
-  margin: 0;
+  border: black 1px solid;
+  border-spacing: 0;
 }
-
-.center {
-  margin: auto;
-  width: 50%;
-  border: 3px solid green;
-  padding: 10px;
+th {
+  background-color: grey;
+  color: white;
+}
+td {
+  padding-left: 7px;
+  padding-right: 7px;
+}
+p {
+  color: blue
+}
+tr:nth-child(even) {
+  background-color: lightgray
 }

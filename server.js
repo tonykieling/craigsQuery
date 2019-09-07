@@ -6,12 +6,8 @@ const dateFormat = require('dateformat');
 let ejs = require('ejs');
 require("dotenv").config();
 const mailgun = require("mailgun-js");
-const mg = mailgun({apiKey: process.env.APIKEY, domain: process.env.DOMAIN});
 
-// let countTimesWhithoutSendEmail = 1;    // variable to count how many times the same data and no sending email
-// const maxTimesWhithoutSendEmail = 12;    // constant to set the maximum times whithout no sending email with same data
-// const frequencyCheck            = 15 * 60 * 1000; // constant that sets the time (in millisecs) so the system is query craiglists
-// const frequencyCheck            = 10000; // constant that sets the time (in millisecs) so the system is query craiglists
+const mg = mailgun({apiKey: process.env.APIKEY, domain: process.env.DOMAIN});
 const gMinPrice                 = 1100;
 const gMaxPrice                 = 1350;
 
@@ -51,6 +47,22 @@ const
       searchDistance  : generalOptions.searchDistance,
       minPrice        : generalOptions.minPrice,
       maxPrice        : generalOptions.maxPrice
+    },
+    {
+      name            : "KingEdward",
+      postal          : "V5Z2C4",
+      category        : generalOptions.category,
+      searchDistance  : generalOptions.searchDistance,
+      minPrice        : generalOptions.minPrice,
+      maxPrice        : generalOptions.maxPrice
+    },
+    {
+      name            : "CityHall",
+      postal          : "V5Z2V2",
+      category        : generalOptions.category,
+      searchDistance  : generalOptions.searchDistance,
+      minPrice        : generalOptions.minPrice,
+      maxPrice        : generalOptions.maxPrice
     }
   ];
 
@@ -59,7 +71,6 @@ const
 // this function only checks whether the data before and current are the same
 // if so, the system may not send the email because nothing has changed
 hasChange = (before, current) => {
-  // console.log(" inside hasChange")
   let someChange = false;
   let internalChange = false;
   for (let c of current)
@@ -95,7 +106,6 @@ hasChange = (before, current) => {
               c.push(objB);
             }
       }
-  // console.log("returning from hasChange: ", someChange && current);
   return(someChange && current);
 }
 
@@ -106,9 +116,8 @@ sendEmail = (content, subject) => {
   const data = {
     from    : "Mailgun Sandbox <postmaster@sandbox002b4d3efa304a4a92fa6ba15da0460f.mailgun.org>",
     to      : process.env.TO,
-    // cc      : process.env.CC,
+    cc      : process.env.CC,
     subject,
-    // subject : `${dateFormat(new Date(), "@HH:MM - dddd  -  mm/dd/yyyy")} - Price range = $${gMinPrice}-$${gMaxPrice}`,
     html    : content
     // text    : content
   };
@@ -122,7 +131,6 @@ sendEmail = (content, subject) => {
 
 // it formats the data to be sent by the email function
 formatDataToBeSent = (list, flag) => {
-  // console.log(" inside formatDataToBeSent");
   ejs.renderFile("./formatHTML.ejs", {list, gMinPrice, gMaxPrice}, options, function(err, result){
     if (err)
       console.log("### err", err);
@@ -131,7 +139,6 @@ formatDataToBeSent = (list, flag) => {
       switch(flag) {
         case "first":
           subject = `${dateFormat(new Date(), "@HH:MM - dddd  -  mm/dd/yyyy")}`;
-          // subject = `${dateFormat(new Date(), "@HH:MM - dddd  -  mm/dd/yyyy")} - Price range = $${gMinPrice}-$${gMaxPrice}`
           break;
         case "new":
           subject = `NEW ${dateFormat(new Date(), "@HH:MM - dddd  -  mm/dd/yyyy")}`;
@@ -144,25 +151,24 @@ formatDataToBeSent = (list, flag) => {
           break;
       }
       sendEmail(result, subject);
-      // console.log("BEFORE=================", result);
-      // console.log("SENDING_EMAILLLLLLLLLLLLLLLLLLLLLLLLLLL");
     }
   });
 }
 
+
+
 // main function of the system
-myFunc = async () => {
-  console.log(" getting list");
-  return;
+mainFunc = async () => {
+  console.log("@mainFunc");
 
   const getList = await options.map(async item => {
     const eachItem = await client.list(item);
     eachItem["name"] = item.name;
+    console.log("eachItem.name", eachItem.name);
     return eachItem;
   });
   const list = await Promise.all(getList);
-  // await console.log(" list", list.length);
-
+  console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
 
   if (await !beforeData){
     // first time the system runs it send the email with the received data from craigslist
@@ -176,28 +182,16 @@ myFunc = async () => {
     const cTime = new Date();
     const queryToHasChange = await hasChange(beforeData, list);
     if (queryToHasChange){
-      console.log("DIFFERENT DATA!!!!!!!!!!!!!!!!!!!!");
+      console.log("DIFFERENT DATA!!!!!!!!!!!!!!!!!!!!", dateFormat(cTime, "HH:MM"));
       const flag = "new";
       formatDataToBeSent(list, flag);
     } else if (((dateFormat(cTime, "HH")) === 8  && (dateFormat(cTime, "MM")) === 0) ||
               (((dateFormat(cTime, "HH")) === 17 && (dateFormat(cTime, "MM")) === 0))) {
-      console.log("+++ GOGOGOGO @", cTime, "HH:MM");
-      // countTimesWhithoutSendEmail = 1;
-      const flag = "same" + dateFormat(cTime, "HH:MM");
+      console.log("+++ GOGOGOGO @", dateFormat(cTime, "HH:MM"));
+      const flag = "same" + dateFormat(cTime, "@HH:MM - dddd  -  mm/dd/yyyy");
       formatDataToBeSent(list, flag);        
-    }
-    // else {
-    //   console.log("checking how many times with the same data");
-    //   console.log("\t\tcount = ", countTimesWhithoutSendEmail);
-    //   if (((countTimesWhithoutSendEmail += 1) > maxTimesWhithoutSendEmail) ) {
-    //     // if the maximum timeswhithout sending email is reached,
-    //     // should set zero to its variable and send the email
-    //     console.log("+++ MAXIMUM TIMES NO SENDING HAS BEEN REACHED, LET'S SEND THE EMAIL ANYWAYS GOGOGOGO");
-    //     countTimesWhithoutSendEmail = 1;
-    //     const flag = "same";
-    //     formatDataToBeSent(list, flag);
-    //   }
-    // }
+    } else
+      console.log(" no changes @", dateFormat(cTime, "HH:MM"));
   }
 
   beforeData = null;
@@ -209,20 +203,22 @@ myFunc = async () => {
 mainController = () => {
   // this is the time controller of the application
   console.log("@inside mainController");
+  mainFunc();
   clearInterval(secondT);
-  let interval = 1000 * 60;    ////////////// 15
+  let interval    = 1000 * 60 * 15;
+  const timeDay   = 1000 * 60 * 15;
+  const timeNight = 1000 * 60 * 30;
   setInterval(() => {
     const currentTime = new Date();
-    console.log(`\n# running @${dateFormat(currentTime, "HH:MM:ss")}`);    /////////////////////////   "HH:MM"
+    console.log(`\n# running @${dateFormat(currentTime, "HH:MM:ss")}`);
     if ((dateFormat(currentTime, "HH")) > 6 &&
-        (dateFormat(currentTime, "HH") < 20))
-      interval = 1000 * 60 * 60;
+        (dateFormat(currentTime, "HH") < 22))
+      interval = timeDay;
     else
-      interval = 1000 * 60 * 15;
+      interval = timeNight;
 
-    if ((dateFormat(currentTime, "MM") % 2) === 0)   ////////// "MM"  15
-      console.log("calling myFunc()!!!!!!!!!!!!!!!!!!!!!")
-      // myFunc();
+    console.log("calling mainFunc()!!!!!!!!!!!!!!!!!!!!!")
+    mainFunc();
   }, interval);
 }
 
@@ -232,19 +228,21 @@ mainController = () => {
 // this is the function to round the timer to multiple of 15 minutes
 // it's gonna be executed only once
 fFifteen = () => {
-  console.log("@inside fFitteen")
+  console.log("@inside fFifteen")
   clearInterval(firstT);
   secondT = setInterval(() => {
-    const cTime = Number(dateFormat(new Date(), "ss"));
-    console.log(`\n#15sec running @${cTime}`);    ////////////////// "MM"
-    if ((cTime % 15) === 0)  ///////////////////////// "MM", 15
+    const cTime = Number(dateFormat(new Date(), "MM"));
+    console.log(`\n#15sec running @${cTime}`);
+    if ((cTime % 15) === 0)
       mainController();
-  }, (1000));
+  }, (1000 * 60));
 }
 
 
 
-// function to get 0 seconds in order to start at zero
+// function to clock's syncronize
+// it will be trigged when the timer gets 0 seconds in order to start each fifteen iterarion at zero seconds
+// it's gonna be executed only once
 fZero = () => {
   console.log("@inside fZero");
   firstT = setInterval(() => {
@@ -261,7 +259,7 @@ fZero = () => {
 // it runs at the very beggining to send the first email
 // it runs only once
 console.log(`\n# 1111111111running @${dateFormat(new Date(), "HH:MM:ss")}`);
-myFunc();
+mainFunc();
 let firstT  = null;
 let secondT = null;
 fZero();

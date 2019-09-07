@@ -44,26 +44,41 @@
               <% if (objk !== "name") { %>
 
                 <tr>
-                    <td colspan="1" class="bodySetting">
-                      <h3>Item: <%= Number(objk) + 1 %></h3>
-                    </td>
-                    <td colspan="1" class="bodySetting">
-                      
-                      <% if (itemArray[objk].modify === "Changed") { %>
-                        <h3 style="color: orange">Changed</h3>
-                      <% } else if (itemArray[objk].modify === "Deleted") { %>
-                        <h3 style="color: red">Deleted</h3>
-                      <% } else if (itemArray[objk].modify === "New") { %>
-                        <h3 style="color: green">NEW</h3>
-                      <% } %>
 
-                      <h3>PID: <%= itemArray[objk].pid %></h3>
+                  
+                  <% if (itemArray[objk].modify === "Changed") { %>
+                    <td colspan="1" class="bodySetting">
+                      <h3 style="color: orange">Item: <%= Number(objk) + 1 %></h3>
                     </td>
                     <td colspan="1" class="bodySetting">
-                      <h3><a href="<%= itemArray[objk].url %>"><%= itemArray[objk].title %> </a></h3>
-                      <h3> Price: <%= itemArray[objk].price %> </h3>
+                      <h3 style="color: orange">Changed</h3>
+                  <% } else if (itemArray[objk].modify === "Deleted") { %>
+                    <td colspan="1" class="bodySetting">
+                      <h3 style="color: red">Item: <%= Number(objk) + 1 %></h3>
                     </td>
-                  </tr>
+                    <td colspan="1" class="bodySetting">
+                      <h3 style="color: red">Deleted</h3>
+                  <% } else if (itemArray[objk].modify === "New") { %>
+                    <td colspan="1" class="bodySetting">
+                      <h3 style="color: lime">Item: <%= Number(objk) + 1 %></h3>
+                    </td>
+                    <td colspan="1" class="bodySetting">
+                      <h3 style="color: lime">NEW</h3>
+                  <% } else { %>
+                    <td colspan="1" class="bodySetting">
+                      <h3 style="color: black">Item: <%= Number(objk) + 1 %></h3>
+                    </td>
+                    <td colspan="1" class="bodySetting">
+                  <% } %>
+
+                    <h3>PID: <%= itemArray[objk].pid %></h3>
+                  </td>                  
+
+                  <td colspan="1" class="bodySetting">
+                    <h3><a href="<%= itemArray[objk].url %>"><%= itemArray[objk].title %> </a></h3>
+                    <h3> Price: <%= itemArray[objk].price %> </h3>
+                  </td>
+                </tr>
               <% } %>
             <% } %>
           </tr>
