@@ -136,15 +136,21 @@ formatDataToBeSent = (list, flag) => {
       console.log("### err", err);
     else {
       let subject = "";
+
+      const d = new Date();
+      const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
+      const nd = new Date(utc + (3600000*-7));
+
+
       switch(flag) {
         case "first":
-          subject = `${dateFormat(new Date(), "@HH:MM - dddd  -  mm/dd/yyyy")}`;
+          subject = `${dateFormat(nd, "@HH:MM - dddd  -  mm/dd/yyyy")}`;
           break;
         case "new":
-          subject = `NEW ${dateFormat(new Date(), "@HH:MM - dddd  -  mm/dd/yyyy")}`;
+          subject = `NEW ${dateFormat(nd, "@HH:MM - dddd  -  mm/dd/yyyy")}`;
           break;
         case "same":
-          subject = `same ${dateFormat(new Date(), "@HH:MM - dddd  -  mm/dd/yyyy")}`;
+          subject = `same ${dateFormat(nd, "@HH:MM - dddd  -  mm/dd/yyyy")}`;
           break;
         default:
           subject = flag;
@@ -160,7 +166,6 @@ formatDataToBeSent = (list, flag) => {
 // main function of the system
 mainFunc = async () => {
   console.log("@mainFunc");
-  // return;
 
   const getList = await options.map(async item => {
     const eachItem = await client.list(item);
@@ -181,7 +186,7 @@ mainFunc = async () => {
     const cTime = new Date();
     const queryToHasChange = await hasChange(beforeData, list);
     if (queryToHasChange){
-      console.log("DIFFERENT DATA!!!!!!!!!!!!!!!!!!!!", dateFormat(cTime, "HH:MM"));
+      console.log("DIFFERENT DATA!!!!!!!", dateFormat(cTime, "HH:MM"));
       const flag = "new";
       formatDataToBeSent(list, flag);
     } else if (((dateFormat(cTime, "HH")) === 8  && (dateFormat(cTime, "MM")) === 0) ||
@@ -216,7 +221,7 @@ mainController = () => {
     else
       interval = timeNight;
 
-    console.log("calling mainFunc()!!!!!!!!!!!!!!!!!!!!!")
+    console.log("calling mainFunc()")
     mainFunc();
   }, interval);
 }
@@ -248,7 +253,7 @@ fZero = () => {
     const t = Number(dateFormat(new Date(), "ss"));
     console.log("time = ", t);
     if (t === 0) {
-      console.log("00000000000000", dateFormat(t, "HH:MM"));
+      console.log("0000", dateFormat(t, "HH:MM"));
       fFifteen();
     }
   }, 1000);
@@ -257,7 +262,7 @@ fZero = () => {
 
 // it runs at the very beggining to send the first email
 // it runs only once
-console.log(`\n# 1111111111running @${dateFormat(new Date(), "HH:MM:ss")}`);
+console.log(`\n# 1111running @${dateFormat(new Date(), "HH:MM:ss")}`);
 mainFunc();
 let firstT  = null;
 let secondT = null;
