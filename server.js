@@ -184,7 +184,7 @@ mainFunc = async () => {
       const flag = "new";
       formatDataToBeSent(list, flag);
     } else if (((dateFormat(cTime, "HH")) === 8  && (dateFormat(cTime, "MM")) === 0) ||
-              (((dateFormat(cTime, "HH")) === 17 && (dateFormat(cTime, "MM")) === 0))) {
+              (((dateFormat(cTime, "HH")) === 18 && (dateFormat(cTime, "MM")) === 0))) {
       console.log("+++ GOGOGOGO @", dateFormat(cTime, "HH:MM"));
       const flag = "same" + dateFormat(cTime, "@HH:MM - dddd  -  mm/dd/yyyy");
       formatDataToBeSent(list, flag);        
