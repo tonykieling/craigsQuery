@@ -160,6 +160,7 @@ formatDataToBeSent = (list, flag) => {
 // main function of the system
 mainFunc = async () => {
   console.log("@mainFunc");
+  return;
 
   const getList = await options.map(async item => {
     const eachItem = await client.list(item);
