@@ -183,14 +183,18 @@ mainFunc = async () => {
   } else {
     // it calls a function to compare list and beforeData, if there are changes
     // if they are diff, the system send the email
-    const cTime = new Date();
+    // const cTime = new Date();
+    const d = new Date();
+    const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
+    const cTime = new Date(utc + (3600000*-7));
+
     const queryToHasChange = await hasChange(beforeData, list);
     if (queryToHasChange){
       console.log("DIFFERENT DATA!!!!!!!", dateFormat(cTime, "HH:MM"));
       const flag = "new";
       formatDataToBeSent(list, flag);
-    } else if (((dateFormat(cTime, "HH")) === 8  && (dateFormat(cTime, "MM")) === 0) ||
-              (((dateFormat(cTime, "HH")) === 18 && (dateFormat(cTime, "MM")) === 0))) {
+    } else if (((dateFormat(cTime, "HH")) === 8  && (dateFormat(cTime, "MM")) === 30) ||
+              (((dateFormat(cTime, "HH")) === 19 && (dateFormat(cTime, "MM")) === 30))) {
       console.log("+++ GOGOGOGO @", dateFormat(cTime, "HH:MM"));
       const flag = "same" + dateFormat(cTime, "@HH:MM - dddd  -  mm/dd/yyyy");
       formatDataToBeSent(list, flag);        
