@@ -186,15 +186,15 @@ mainFunc = async () => {
     // const cTime = new Date();
     const d = new Date();
     const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
-    const cTime = new Date(utc + (3600000*-7));
+    const cTime = new Date(utc + (3600000 * -7));
 
     const queryToHasChange = await hasChange(beforeData, list);
     if (queryToHasChange){
       console.log("DIFFERENT DATA!!!!!!!", dateFormat(cTime, "HH:MM"));
       const flag = "new";
       formatDataToBeSent(list, flag);
-    } else if (((dateFormat(cTime, "HH")) === 8  && (dateFormat(cTime, "MM")) === 30) ||
-              (((dateFormat(cTime, "HH")) === 19 && (dateFormat(cTime, "MM")) === 30))) {
+    } else if ((Number(dateFormat(cTime, "HH")) === 8  && (Number(dateFormat(cTime, "MM"))) === 30) ||
+              ((Number(dateFormat(cTime, "HH")) === 19 && (Number(dateFormat(cTime, "MM"))) === 45))) {
       console.log("+++ GOGOGOGO @", dateFormat(cTime, "HH:MM"));
       const flag = "same" + dateFormat(cTime, "@HH:MM - dddd  -  mm/dd/yyyy");
       formatDataToBeSent(list, flag);        
@@ -217,10 +217,13 @@ mainController = () => {
   const timeDay   = 1000 * 60 * 15;
   const timeNight = 1000 * 60 * 30;
   setInterval(() => {
-    const currentTime = new Date();
+    const d = new Date();
+    const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
+    const currentTime = new Date(utc + (3600000 * -7));
+
     console.log(`\n# running @${dateFormat(currentTime, "HH:MM:ss")}`);
-    if ((dateFormat(currentTime, "HH")) > 6 &&
-        (dateFormat(currentTime, "HH") < 22))
+    if (Number(dateFormat(currentTime, "HH")) > 6 &&
+        (Number(dateFormat(currentTime, "HH")) < 22))
       interval = timeDay;
     else
       interval = timeNight;
@@ -239,7 +242,12 @@ fFifteen = () => {
   console.log("@inside fFifteen")
   clearInterval(firstT);
   secondT = setInterval(() => {
-    const cTime = Number(dateFormat(new Date(), "MM"));
+    // const cTime = Number(dateFormat(new Date(), "MM"));
+
+    const d = new Date();
+    const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
+    const cTime = Number(dateFormat(new Date(utc + (3600000 * -7)), "MM"));
+
     console.log(`\n#15sec running @${cTime}`);
     if ((cTime % 15) === 0)
       mainController();
@@ -254,7 +262,11 @@ fFifteen = () => {
 fZero = () => {
   console.log("@inside fZero");
   firstT = setInterval(() => {
-    const t = Number(dateFormat(new Date(), "ss"));
+    // const t = Number(dateFormat(new Date(), "ss"));
+    const d = new Date();
+    const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
+    const t = Number(dateFormat(new Date(utc + (3600000 * -7)), "ss"));
+
     console.log("time = ", t);
     if (t === 0) {
       console.log("0000", dateFormat(t, "HH:MM"));
