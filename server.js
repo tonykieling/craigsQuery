@@ -221,7 +221,7 @@ mainController = () => {
     const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
     const currentTime = new Date(utc + (3600000 * -7));
 
-    console.log(`\n# running @${dateFormat(currentTime, "HH:MM:ss")}`);
+    console.log(`# running @${dateFormat(currentTime, "HH:MM:ss")}`);
     if (Number(dateFormat(currentTime, "HH")) > 6 &&
         (Number(dateFormat(currentTime, "HH")) < 22))
       interval = timeDay;
@@ -247,7 +247,7 @@ fFifteen = () => {
     // const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
     // const cTime = Number(dateFormat(new Date(utc + (3600000 * -7)), "MM"));
 
-    console.log(`\n#15sec running @${cTime}`);
+    console.log(`#15sec running @${cTime}`);
     if ((cTime % 15) === 0)
       mainController();
   }, (1000 * 60));
@@ -277,7 +277,7 @@ fZero = () => {
 
 // it runs at the very beggining to send the first email
 // it runs only once
-console.log(`\n# 1111running @${dateFormat(new Date(), "HH:MM:ss")}`);
+console.log(`# 1111running @${dateFormat(new Date(), "HH:MM:ss")}`);
 mainFunc();
 let firstT  = null;
 let secondT = null;
