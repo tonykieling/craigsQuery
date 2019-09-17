@@ -116,14 +116,14 @@ sendEmail = (content, subject) => {
   const data = {
     from    : "Mailgun Sandbox <postmaster@sandbox002b4d3efa304a4a92fa6ba15da0460f.mailgun.org>",
     to      : process.env.TO,
-    cc      : process.env.CC,
+    // cc      : process.env.CC,
     subject,
     html    : content
     // text    : content
   };
   
   mg.messages().send(data, function (error, body) {
-    console.log("body", body);
+    console.log("body", body.message);
   });  
 }
 
@@ -174,7 +174,7 @@ mainFunc = async () => {
   });
   const list = await Promise.all(getList);
 
-  if (await !beforeData){
+  if (!beforeData){
     // first time the system runs it send the email with the received data from craigslist
     console.log("FIRST TIME");
     const flag = "first";
@@ -190,16 +190,16 @@ mainFunc = async () => {
 
     const queryToHasChange = await hasChange(beforeData, list);
     if (queryToHasChange){
-      console.log("DIFFERENT DATA!!!!!!!", dateFormat(cTime, "HH:MM"));
+      console.log(" diff data!!!!!!! => ", dateFormat(cTime, "HH:MM"));
       const flag = "new";
       formatDataToBeSent(list, flag);
-    } else if ((Number(dateFormat(cTime, "HH")) === 8  && (Number(dateFormat(cTime, "MM"))) === 30) ||
-              ((Number(dateFormat(cTime, "HH")) === 19 && (Number(dateFormat(cTime, "MM"))) === 45))) {
-      console.log("+++ GOGOGOGO @", dateFormat(cTime, "HH:MM"));
-      const flag = "same" + dateFormat(cTime, "@HH:MM - dddd  -  mm/dd/yyyy");
-      formatDataToBeSent(list, flag);        
+    // } else if ((Number(dateFormat(cTime, "HH")) === 8  && (Number(dateFormat(cTime, "MM"))) === 30) ||
+    //           ((Number(dateFormat(cTime, "HH")) === 19 && (Number(dateFormat(cTime, "MM"))) === 45))) {
+    //   console.log("+++ GOGOGOGO @", dateFormat(cTime, "HH:MM"));
+    //   const flag = "same" + dateFormat(cTime, "@HH:MM - dddd  -  mm/dd/yyyy");
+    //   formatDataToBeSent(list, flag);        
     } else
-      console.log(" no changes @", dateFormat(cTime, "HH:MM"));
+      console.log(" no changes => ", dateFormat(cTime, "HH:MM"));
   }
 
   beforeData = null;
@@ -213,9 +213,9 @@ mainController = () => {
   console.log("@inside mainController");
   mainFunc();
   clearInterval(secondT);
-  let interval    = 1000 * 60 * 15;
   const timeDay   = 1000 * 60 * 15;
   const timeNight = 1000 * 60 * 30;
+  let interval    = timeDay;
   setInterval(() => {
     const d = new Date();
     const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
@@ -228,7 +228,6 @@ mainController = () => {
     else
       interval = timeNight;
 
-    console.log("calling mainFunc()")
     mainFunc();
   }, interval);
 }
@@ -242,11 +241,11 @@ fFifteen = () => {
   console.log("@inside fFifteen")
   clearInterval(firstT);
   secondT = setInterval(() => {
-    // const cTime = Number(dateFormat(new Date(), "MM"));
+    const cTime = Number(dateFormat(new Date(), "MM"));
 
-    const d = new Date();
-    const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
-    const cTime = Number(dateFormat(new Date(utc + (3600000 * -7)), "MM"));
+    // const d = new Date();
+    // const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
+    // const cTime = Number(dateFormat(new Date(utc + (3600000 * -7)), "MM"));
 
     console.log(`\n#15sec running @${cTime}`);
     if ((cTime % 15) === 0)
@@ -262,13 +261,13 @@ fFifteen = () => {
 fZero = () => {
   console.log("@inside fZero");
   firstT = setInterval(() => {
-    // const t = Number(dateFormat(new Date(), "ss"));
-    const d = new Date();
-    const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
-    const t = Number(dateFormat(new Date(utc + (3600000 * -7)), "ss"));
+    const t = Number(dateFormat(new Date(), "ss"));
+    // const d = new Date();
+    // const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
+    // const t = Number(dateFormat(new Date(utc + (3600000 * -7)), "ss"));
 
     console.log("time = ", t);
-    if (t === 0) {
+    if (t === 59 || t === 0) {
       console.log("0000", dateFormat(t, "HH:MM"));
       fFifteen();
     }
