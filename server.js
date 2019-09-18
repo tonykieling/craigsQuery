@@ -200,7 +200,7 @@ mainFunc = async () => {
     //   formatDataToBeSent(list, flag);        
     } else
       console.log(" no changes => ", dateFormat(cTime, "HH:MM"));
-      return;
+      // return;
   }
 
   beforeData = null;
