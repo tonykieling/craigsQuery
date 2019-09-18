@@ -123,7 +123,7 @@ sendEmail = (content, subject) => {
   };
   
   mg.messages().send(data, function (error, body) {
-    console.log("body", body);
+    console.log("body", body.message);
   });  
 }
 
@@ -191,7 +191,11 @@ mainFunc = async () => {
     const queryToHasChange = await hasChange(beforeData, list);
 
     if (queryToHasChange){
+<<<<<<< HEAD
       console.log(" diff data!! - ", dateFormat(cTime, "HH:MM"));
+=======
+      console.log(" diff data!!!!!!! => ", dateFormat(cTime, "HH:MM"));
+>>>>>>> 6eddcc30474e4c9e6a760ff71aa158aff8ec2315
       const flag = "new";
       formatDataToBeSent(list, flag);
     // } else if ((Number(dateFormat(cTime, "HH")) === 8  && (Number(dateFormat(cTime, "MM"))) === 30) ||
@@ -200,8 +204,12 @@ mainFunc = async () => {
     //   const flag = "same" + dateFormat(cTime, "@HH:MM - dddd  -  mm/dd/yyyy");
     //   formatDataToBeSent(list, flag);        
     } else
+<<<<<<< HEAD
       console.log(" no changes - ", dateFormat(cTime, "HH:MM"));
       return;
+=======
+      console.log(" no changes => ", dateFormat(cTime, "HH:MM"));
+>>>>>>> 6eddcc30474e4c9e6a760ff71aa158aff8ec2315
   }
 
   beforeData = null;
@@ -223,14 +231,17 @@ mainController = () => {
     const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
     const currentTime = new Date(utc + (3600000 * -7));
 
-    console.log(`\n# running @${dateFormat(currentTime, "HH:MM:ss")}`);
+    console.log(`# running @${dateFormat(currentTime, "HH:MM:ss")}`);
     if (Number(dateFormat(currentTime, "HH")) > 6 &&
         (Number(dateFormat(currentTime, "HH")) < 22))
       interval = timeDay;
     else
       interval = timeNight;
 
+<<<<<<< HEAD
     // console.log("calling mainFunc()");
+=======
+>>>>>>> 6eddcc30474e4c9e6a760ff71aa158aff8ec2315
     mainFunc();
   }, interval);
 }
@@ -250,7 +261,7 @@ fFifteen = () => {
     // const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
     // const cTime = Number(dateFormat(new Date(utc + (3600000 * -7)), "MM"));
 
-    console.log(`\n#15sec running @${cTime}`);
+    console.log(`#15sec running @${cTime}`);
     if ((cTime % 15) === 0)
       mainController();
   }, (1000 * 60));
@@ -270,8 +281,13 @@ fZero = () => {
     // const t = Number(dateFormat(new Date(utc + (3600000 * -7)), "ss"));
 
     console.log("time = ", t);
+<<<<<<< HEAD
     if (t === 0) {
       console.log("0", dateFormat(t, "HH:MM"));
+=======
+    if (t === 59 || t === 0) {
+      console.log("0000", dateFormat(t, "HH:MM"));
+>>>>>>> 6eddcc30474e4c9e6a760ff71aa158aff8ec2315
       fFifteen();
     }
   }, 1000);
@@ -280,7 +296,7 @@ fZero = () => {
 
 // it runs at the very beggining to send the first email
 // it runs only once
-console.log(`\n# 1111running @${dateFormat(new Date(), "HH:MM:ss")}`);
+console.log(`# 1111running @${dateFormat(new Date(), "HH:MM:ss")}`);
 mainFunc();
 let firstT  = null;
 let secondT = null;
