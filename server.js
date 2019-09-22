@@ -117,7 +117,7 @@ sendEmail = (content, subject) => {
   const data = {
     from    : "Mailgun Sandbox <postmaster@sandbox002b4d3efa304a4a92fa6ba15da0460f.mailgun.org>",
     to      : process.env.TO,
-    // cc      : process.env.CC,
+    cc      : process.env.CC,
     subject,
     html    : content
     // text    : content
@@ -163,7 +163,7 @@ formatDataToBeSent = (list, flag) => {
 
 // main function of the system
 mainFunc = async () => {
-  console.log("@mainFunc");
+  // console.log("@mainFunc");
 
   const getList = await options.map(async item => {
     const eachItem = await client.list(item);
@@ -192,9 +192,10 @@ mainFunc = async () => {
       console.log(" diff data!! - ", dateFormat(cTime, "HH:MM"));
       const flag = "new";
       formatDataToBeSent(list, flag);
-    } else
+    } else {
       console.log(" no changes => ", dateFormat(cTime, "HH:MM"));
       return;
+    }
   }
 
   beforeData = null;
@@ -216,7 +217,7 @@ mainController = () => {
     const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
     const currentTime = new Date(utc + (3600000 * -7));
 
-    console.log(`# running @${dateFormat(currentTime, "HH:MM:ss")}`);
+    // console.log(`# running @${dateFormat(currentTime, "HH:MM:ss")}`);
     if (Number(dateFormat(currentTime, "HH")) > 6 &&
         (Number(dateFormat(currentTime, "HH")) < 22))
       interval = timeDay;
@@ -268,7 +269,7 @@ fZero = () => {
 
 // it runs at the very beggining to send the first email
 // it runs only once
-console.log(`# 1111running @${dateFormat(new Date(), "HH:MM:ss")}`);
+console.log(`# first running @${dateFormat(new Date(), "HH:MM:ss")}`);
 mainFunc();
 let firstT  = null;
 let secondT = null;
