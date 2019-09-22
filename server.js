@@ -2,20 +2,21 @@
 // dotenv
 // mailgun
 
-const dateFormat = require('dateformat');
-let ejs = require('ejs');
-const mailgun = require("mailgun-js");
+const dateFormat  = require('dateformat');
+let ejs           = require('ejs');
+const mailgun     = require("mailgun-js");
 
 require("dotenv").config();
 
-const mg = mailgun({apiKey: process.env.APIKEY, domain: process.env.DOMAIN});
-const gMinPrice                 = 1100;
-const gMaxPrice                 = 1350;
+const mg          = mailgun({apiKey: process.env.APIKEY, domain: process.env.DOMAIN});
+const gMinPrice   = 1100;
+const gMaxPrice   = 1350;
 
-let beforeData = null;
+let beforeData    = null;
+
 const
-  craigslist = require('node-craigslist'),
-  client = new craigslist.Client({
+  craigslist  = require('node-craigslist'),
+  client      = new craigslist.Client({
     city : 'vancouver',
   }),
   generalOptions = {
@@ -73,7 +74,6 @@ const
 // if so, the system may not send the email because nothing has changed
 hasChange = (before, current) => {
   let someChange = false;
-  let internalChange = false;
   for (let c of current)
     for (let b of before)
       if (b.name === c.name) {
@@ -85,7 +85,6 @@ hasChange = (before, current) => {
               if (objB.price !== objC.price) {
                 objC.modify     = "Changed";
                 someChange       = true;
-                internalChange  = true;
               }
               break;
             } else {
@@ -93,19 +92,17 @@ hasChange = (before, current) => {
               if (countC === b.length) {
                 someChange       = true;
                 objC.modify     = "New";
-                internalChange  = true;
                 break;
               }
             }
           }
         }
-        if (internalChange)
-          for (let objB of b)
-            if (!objB.flag) {
-              objB.modify = "Deleted";
-              someChange   = true;
-              c.push(objB);
-            }
+        for (let objB of b)
+          if (!objB.flag) {
+            objB.modify = "Deleted";
+            someChange   = true;
+            c.push(objB);
+          }
       }
   return(someChange && current);
 }
@@ -124,36 +121,24 @@ sendEmail = (content, subject) => {
   };
   
   mg.messages().send(data, function (error, body) {
-    console.log("body", body.message);
+    console.log("### sending email ==> ", body.message);
   });  
 }
 
 
 
 // it formats the data to be sent by the email function
-formatDataToBeSent = (list, flag) => {
+formatDataToBeSent = (list) => {
   ejs.renderFile("./formatHTML.ejs", {list, gMinPrice, gMaxPrice}, options, function(err, result){
     if (err)
       console.log("### err", err);
     else {
-      let subject = "";
-
       const d = new Date();
       const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
       const nd = new Date(utc + (3600000*-7));
 
+      const subject = `${dateFormat(nd, "@HH:MM - dddd  -  dd/mm/yyyy")}`;
 
-      switch(flag) {
-        case "first":
-          subject = `${dateFormat(nd, "@HH:MM - dddd  -  mm/dd/yyyy")}`;
-          break;
-        case "new":
-          subject = `NEW ${dateFormat(nd, "@HH:MM - dddd  -  mm/dd/yyyy")}`;
-          break;
-        default:
-          subject = flag;
-          break;
-      }
       sendEmail(result, subject);
     }
   });
@@ -163,7 +148,6 @@ formatDataToBeSent = (list, flag) => {
 
 // main function of the system
 mainFunc = async () => {
-  // console.log("@mainFunc");
 
   const getList = await options.map(async item => {
     const eachItem = await client.list(item);
@@ -175,13 +159,11 @@ mainFunc = async () => {
   if (!beforeData){
     // first time the system runs it send the email with the received data from craigslist
     console.log("FIRST TIME");
-    const flag = "first";
-    formatDataToBeSent(list, flag);
+    formatDataToBeSent(list);
 
   } else {
     // it calls a function to compare list and beforeData, if there are changes
     // if they are diff, the system send the email
-    // const cTime = new Date();
     const d = new Date();
     const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
     const cTime = new Date(utc + (3600000 * -7));
@@ -190,8 +172,7 @@ mainFunc = async () => {
 
     if (await queryToHasChange){
       console.log(" diff data!! - ", dateFormat(cTime, "HH:MM"));
-      const flag = "new";
-      formatDataToBeSent(list, flag);
+      formatDataToBeSent(list);
     } else {
       console.log(" no changes => ", dateFormat(cTime, "HH:MM"));
       return;
@@ -206,7 +187,6 @@ mainFunc = async () => {
 
 mainController = () => {
   // this is the time controller of the application
-  // console.log("@inside mainController");
   mainFunc();
   clearInterval(secondT);
   const timeDay   = 1000 * 60 * 15;
@@ -217,7 +197,6 @@ mainController = () => {
     const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
     const currentTime = new Date(utc + (3600000 * -7));
 
-    // console.log(`# running @${dateFormat(currentTime, "HH:MM:ss")}`);
     if (Number(dateFormat(currentTime, "HH")) > 6 &&
         (Number(dateFormat(currentTime, "HH")) < 22))
       interval = timeDay;
