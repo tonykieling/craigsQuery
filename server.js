@@ -4,8 +4,9 @@
 
 const dateFormat = require('dateformat');
 let ejs = require('ejs');
-require("dotenv").config();
 const mailgun = require("mailgun-js");
+
+require("dotenv").config();
 
 const mg = mailgun({apiKey: process.env.APIKEY, domain: process.env.DOMAIN});
 const gMinPrice                 = 1100;
@@ -235,10 +236,13 @@ fFifteen = () => {
   clearInterval(firstT);
   secondT = setInterval(() => {
     const cTime = Number(dateFormat(new Date(), "MM"));
-
     console.log(`#15sec running @${cTime}`);
-    if ((cTime % 15) === 0)
+
+    if ((cTime % 15) === 0) {
+      console.log("got FIFTEEN", dateFormat(new Date(), "HH:MM:ss"));
       mainController();
+    }
+
   }, (1000 * 60));
 }
 
@@ -250,11 +254,13 @@ fFifteen = () => {
 fZero = () => {
   firstT = setInterval(() => {
     const t = Number(dateFormat(new Date(), "ss"));
-
     console.log("time = ", t);
-    if (t === 59 || t === 0) {
-      console.log("got ZERO", dateFormat(t, "HH:MM:ss"));
+
+    if (t === 0 || t === 1) {
+      // console.log("got ZERO", dateFormat(t, "HH:MM:ss"));
+      console.log("got ZERO", dateFormat(new Date(), "HH:MM:ss"));
       fFifteen();
+
     }
   }, 1000);
 }
