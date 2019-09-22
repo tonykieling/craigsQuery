@@ -19,7 +19,7 @@ const
   }),
   generalOptions = {
       category        : "apa",
-      searchDistance  : 1,
+      searchDistance  : 0.7,
       minPrice        : gMinPrice,
       maxPrice        : gMaxPrice
   }
@@ -116,7 +116,7 @@ sendEmail = (content, subject) => {
   const data = {
     from    : "Mailgun Sandbox <postmaster@sandbox002b4d3efa304a4a92fa6ba15da0460f.mailgun.org>",
     to      : process.env.TO,
-    cc      : process.env.CC,
+    // cc      : process.env.CC,
     subject,
     html    : content
     // text    : content
@@ -148,9 +148,6 @@ formatDataToBeSent = (list, flag) => {
           break;
         case "new":
           subject = `NEW ${dateFormat(nd, "@HH:MM - dddd  -  mm/dd/yyyy")}`;
-          break;
-        case "same":
-          subject = `same ${dateFormat(nd, "@HH:MM - dddd  -  mm/dd/yyyy")}`;
           break;
         default:
           subject = flag;
@@ -189,18 +186,14 @@ mainFunc = async () => {
     const cTime = new Date(utc + (3600000 * -7));
 
     const queryToHasChange = await hasChange(beforeData, list);
-    if (queryToHasChange){
-      console.log(" diff data!!!!!!! => ", dateFormat(cTime, "HH:MM"));
+
+    if (await queryToHasChange){
+      console.log(" diff data!! - ", dateFormat(cTime, "HH:MM"));
       const flag = "new";
       formatDataToBeSent(list, flag);
-    // } else if ((Number(dateFormat(cTime, "HH")) === 8  && (Number(dateFormat(cTime, "MM"))) === 30) ||
-    //           ((Number(dateFormat(cTime, "HH")) === 19 && (Number(dateFormat(cTime, "MM"))) === 45))) {
-    //   console.log("+++ GOGOGOGO @", dateFormat(cTime, "HH:MM"));
-    //   const flag = "same" + dateFormat(cTime, "@HH:MM - dddd  -  mm/dd/yyyy");
-    //   formatDataToBeSent(list, flag);        
     } else
       console.log(" no changes => ", dateFormat(cTime, "HH:MM"));
-      // return;
+      return;
   }
 
   beforeData = null;
@@ -211,7 +204,7 @@ mainFunc = async () => {
 
 mainController = () => {
   // this is the time controller of the application
-  console.log("@inside mainController");
+  // console.log("@inside mainController");
   mainFunc();
   clearInterval(secondT);
   const timeDay   = 1000 * 60 * 15;
@@ -239,14 +232,9 @@ mainController = () => {
 // this is the function to round the timer to multiple of 15 minutes
 // it's gonna be executed only once
 fFifteen = () => {
-  console.log("@inside fFifteen")
   clearInterval(firstT);
   secondT = setInterval(() => {
     const cTime = Number(dateFormat(new Date(), "MM"));
-
-    // const d = new Date();
-    // const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
-    // const cTime = Number(dateFormat(new Date(utc + (3600000 * -7)), "MM"));
 
     console.log(`#15sec running @${cTime}`);
     if ((cTime % 15) === 0)
@@ -260,16 +248,12 @@ fFifteen = () => {
 // it will be trigged when the timer gets 0 seconds in order to start each fifteen iterarion at zero seconds
 // it's gonna be executed only once
 fZero = () => {
-  console.log("@inside fZero");
   firstT = setInterval(() => {
     const t = Number(dateFormat(new Date(), "ss"));
-    // const d = new Date();
-    // const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
-    // const t = Number(dateFormat(new Date(utc + (3600000 * -7)), "ss"));
 
     console.log("time = ", t);
     if (t === 59 || t === 0) {
-      console.log("0000", dateFormat(t, "HH:MM"));
+      console.log("got ZERO", dateFormat(t, "HH:MM:ss"));
       fFifteen();
     }
   }, 1000);
