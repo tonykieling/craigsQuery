@@ -3,14 +3,15 @@
 // mailgun
 
 const dateFormat  = require('dateformat');
-let ejs           = require('ejs');
+const ejs           = require('ejs');
 const mailgun     = require("mailgun-js");
 
 require("dotenv").config();
 
 const mg          = mailgun({apiKey: process.env.APIKEY, domain: process.env.DOMAIN});
-const gMinPrice   = 1100;
-const gMaxPrice   = 1350;
+
+const gMinPrice   = 1100,
+      gMaxPrice   = 1350;
 
 let beforeData    = null;
 
@@ -128,16 +129,22 @@ sendEmail = (content, subject) => {
 
 
 // it formats the data to be sent by the email function
-formatDataToBeSent = (list) => {
+// it is called just when need to send email, right before that
+formatDataToBeSent = (list, flag) => {
   ejs.renderFile("./formatHTML.ejs", {list, gMinPrice, gMaxPrice}, options, function(err, result){
     if (err)
       console.log("### err", err);
     else {
-      const d = new Date();
-      const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
-      const nd = new Date(utc + (3600000*-7));
+      const d = new Date(),
+            utc = d.getTime() + (d.getTimezoneOffset() * 60000),
+            nd = new Date(utc + (3600000*-7));
 
-      const subject = `${dateFormat(nd, "@HH:MM - dddd  -  dd/mm/yyyy")}`;
+      let subject = "";
+
+      if (flag === "first")
+        subject = `fromZero - ${dateFormat(nd, "@HH:MM - dddd  -  dd/mm/yyyy")}`;
+      else
+        subject = `${dateFormat(nd, "@HH:MM - dddd  -  dd/mm/yyyy")}`;
 
       sendEmail(result, subject);
     }
@@ -147,6 +154,9 @@ formatDataToBeSent = (list) => {
 
 
 // main function of the system
+// this function that queries craigslist
+// it calls an auxiliary function to check if there is change between the last query and the current one
+// also, if the case, it call the function to send email - using mailgun
 mainFunc = async () => {
 
   const getList = await options.map(async item => {
@@ -159,14 +169,15 @@ mainFunc = async () => {
   if (!beforeData){
     // first time the system runs it send the email with the received data from craigslist
     console.log("FIRST TIME");
-    formatDataToBeSent(list);
+    const flag = "first";
+    formatDataToBeSent(list, flag);
 
   } else {
     // it calls a function to compare list and beforeData, if there are changes
     // if they are diff, the system send the email
-    const d = new Date();
-    const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
-    const cTime = new Date(utc + (3600000 * -7));
+    const d = new Date(),
+          utc = d.getTime() + (d.getTimezoneOffset() * 60000),
+          cTime = new Date(utc + (3600000 * -7));
 
     const queryToHasChange = await hasChange(beforeData, list);
 
@@ -185,18 +196,26 @@ mainFunc = async () => {
 
 
 
+// this is the main time controller of the application
+// it will run while the system still running because here is where is defined the intervals to check on craigslist
 mainController = () => {
-  // this is the time controller of the application
-  mainFunc();
   clearInterval(secondT);
-  const timeDay   = 1000 * 60 * 15;
-  const timeNight = 1000 * 60 * 30;
+  mainFunc();   
+  const timeDay   = 1000 * 60 * 15,
+        timeNight = 1000 * 60 * 30;
   let interval    = timeDay;
-  setInterval(() => {
-    const d = new Date();
-    const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
-    const currentTime = new Date(utc + (3600000 * -7));
+  // the code above will run just once
+  
 
+  // this function runs forever, while this application is running
+  setInterval(() => {
+    const d = new Date(),
+          utc = d.getTime() + (d.getTimezoneOffset() * 60000),
+          currentTime = new Date(utc + (3600000 * -7));
+
+    // according to the current time, the variable interval is set
+    // at night, btw 22 - 6 it will run every 30 minutes
+    // at day, it runs every 15 minutes
     if (Number(dateFormat(currentTime, "HH")) > 6 &&
         (Number(dateFormat(currentTime, "HH")) < 22))
       interval = timeDay;
@@ -237,7 +256,6 @@ fZero = () => {
     console.log("time = ", t);
 
     if (t === 0 || t === 1) {
-      // console.log("got ZERO", dateFormat(t, "HH:MM:ss"));
       console.log("got ZERO", dateFormat(new Date(), "HH:MM:ss"));
       fFifteen();
 
