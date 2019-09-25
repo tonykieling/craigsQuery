@@ -85,13 +85,13 @@ hasChange = (before, current) => {
               objB.flag = true;
               if (objB.price !== objC.price) {
                 objC.modify     = "Changed";
-                someChange       = true;
+                someChange      = true;
               }
               break;
             } else {
               countC += 1;
               if (countC === b.length) {
-                someChange       = true;
+                someChange      = true;
                 objC.modify     = "New";
                 break;
               }
@@ -100,7 +100,7 @@ hasChange = (before, current) => {
         }
         for (let objB of b)
           if (!objB.flag) {
-            objB.modify = "Deleted";
+            objB.modify  = "Deleted";
             someChange   = true;
             c.push(objB);
           }
@@ -182,12 +182,10 @@ mainFunc = async () => {
     const queryToHasChange = await hasChange(beforeData, list);
 
     if (await queryToHasChange){
-      console.log(" diff data!! - ", dateFormat(cTime, "HH:MM"));
+      console.log(" ==> diff data!! - ", dateFormat(cTime, "HH:MM"));
       formatDataToBeSent(list);
-    } else {
+    } else
       console.log(" no changes => ", dateFormat(cTime, "HH:MM"));
-      return;
-    }
   }
 
   beforeData = null;
@@ -201,26 +199,27 @@ mainFunc = async () => {
 mainController = () => {
   clearInterval(secondT);
   mainFunc();   
-  const timeDay   = 1000 * 60 * 15,
-        timeNight = 1000 * 60 * 30;
-  let interval    = timeDay;
+  // const timeDay   = 1000 * 60 * 15
+  //       timeNight = 1000 * 60 * 30;
+  let interval    = 1000 * 60 * 15;
   // the code above will run just once
   
 
   // this function runs forever, while this application is running
   setInterval(() => {
-    const d = new Date(),
-          utc = d.getTime() + (d.getTimezoneOffset() * 60000),
-          currentTime = new Date(utc + (3600000 * -7));
+    // const d = new Date(),
+    //       utc = d.getTime() + (d.getTimezoneOffset() * 60000),
+    //       currentTime = new Date(utc + (3600000 * -7));
 
     // according to the current time, the variable interval is set
     // at night, btw 22 - 6 it will run every 30 minutes
     // at day, it runs every 15 minutes
-    if (Number(dateFormat(currentTime, "HH")) > 6 &&
-        (Number(dateFormat(currentTime, "HH")) < 22))
-      interval = timeDay;
-    else
-      interval = timeNight;
+    //////////////NOT WORKING NEED TO KILL THE SETINTERVAL
+    // if (Number(dateFormat(currentTime, "HH")) > 6 &&
+    //     (Number(dateFormat(currentTime, "HH")) < 22))
+    //   interval = timeDay;
+    // else
+    //   interval = timeNight;
 
     mainFunc();
   }, interval);
