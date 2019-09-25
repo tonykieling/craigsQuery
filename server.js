@@ -184,8 +184,10 @@ mainFunc = async () => {
     if (await queryToHasChange){
       console.log(" ==> diff data!! - ", dateFormat(cTime, "HH:MM"));
       formatDataToBeSent(list);
-    } else
+    } else {
       console.log(" no changes => ", dateFormat(cTime, "HH:MM"));
+      return;
+    }
   }
 
   beforeData = null;
