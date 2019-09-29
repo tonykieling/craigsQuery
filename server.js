@@ -107,16 +107,50 @@ mainFunc = async () => {
 }
 
 
+changeControlVar = async (checkV) => {
+  console.log("inside changeControlVar");
+  clearInterval(controlVar);
+  (checkV === "night") ? mainController("night") : mainController("day");
+}
+
 
 // this is the main time controller of the application
 // it will run while the system still running because here is where is defined the intervals to check on craigslist
-mainController = () => {
-  clearInterval(secondT);
-  mainFunc();   
-  let interval    = 1000 * 60 * 15;  
+mainController = (checkVar) => {
+  console.log("inside mainControler. \n checkVar = ", checkVar);
+  let night = false;
+  if (checkVar === "day") {
+    if (secondT)
+      clearInterval(secondT);
+
+    interval  = 1000 * 60 * 15;
+    mainFunc();
+  } else
+    interval = 1000 * 60 * 45;
+
 
   // this function runs forever, while this application is running
-  setInterval(() => {
+  controlVar = setInterval(() => {
+    console.log("inside controlVar setInterval");
+    const d     = new Date(),
+          utc   = d.getTime() + (d.getTimezoneOffset() * 60000),
+          cTime = new Date(utc + (3600000 * -7));
+
+    console.log("checking if time is btw 11 and 12");
+    if (((dateFormat(cTime, "HH") >= 14) && (dateFormat(cTime, "HH") < 16)) && (!night)) {
+      console.log("time is working ===> ", dateFormat(cTime, "HH:MM:ss"));
+      night = true;
+      changeControlVar("night");
+    } 
+    
+    if ((dateFormat(cTime, "HH") > 15)) {
+      console.log("time is greater or equal to 15 ==> ", dateFormat(cTime, "HH:MM:ss"));
+      if (night){
+        console.log("night is ON but go to OFF");
+        changeControlVar("day");
+      }
+    }
+
     mainFunc();
   }, interval);
 }
@@ -137,7 +171,7 @@ fFifteen = () => {
 
     if (((dateFormat(cTime, "MM")) % 15) === 0) {
       console.log("got FIFTEEN", dateFormat(cTime, "HH:MM:ss"));
-      mainController();
+      mainController("day");
     }
 
   }, (1000 * 60));
@@ -173,6 +207,10 @@ const d = new Date(),
       cTime = new Date(utc + (3600000 * -7));
 console.log(`# first running @${dateFormat(cTime, "HH:MM:ss")}`);
 mainFunc();
-let firstT  = null;
-let secondT = null;
+
+let firstT      = null,
+    secondT     = null,
+    controlVar  = null,
+    interval    = null;
+
 fZero();

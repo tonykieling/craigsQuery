@@ -8,7 +8,7 @@ sendEmail = (content, subject) => {
     const data = {
       from    : "Mailgun Sandbox <postmaster@sandbox002b4d3efa304a4a92fa6ba15da0460f.mailgun.org>",
       to      : process.env.TO,
-      cc      : process.env.CC,
+      // cc      : process.env.CC,
       subject,
       html    : content
       // text    : content
