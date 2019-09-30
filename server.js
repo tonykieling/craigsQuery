@@ -107,53 +107,37 @@ mainFunc = async () => {
 }
 
 
-// changeControlVar = async (checkV) => {
-//   console.log("inside changeControlVar");
-//   clearInterval(controlVar);
-//   (checkV === "night") ? mainController("night") : mainController("day");
-// }
+// function to change the interval time, according to the curretn time
+// if between 22 - 6:59 the interval is one hour
+// if between 7 to 21:59, the interval is 15 minutes
+changeControlVar = (dayOrNight) => {
+  clearInterval(controlVar);
+  if (dayOrNight === "night") {
+    mainController(false, nightTime, true);
+  } else if (dayTime === "day")
+    mainController(false, dayTime, false);
+    
+}
 
 
 // this is the main time controller of the application
 // it will run while the system still running because here is where is defined the intervals to check on craigslist
-mainController = () => {
-  // console.log("inside mainControler. \n checkVar = ", checkVar);
-  // let night = false;
-  // if (checkVar === "day") {
-  //   if (secondT)
-  //     clearInterval(secondT);
-
-  //   interval  = 1000 * 60 * 15;
-  //   mainFunc();
-  // } else
-  //   interval = 1000 * 60 * 45;
-
-
-  // // this function runs forever, while this application is running
-  // controlVar = setInterval(() => {
-  //   console.log("inside controlVar setInterval");
-  //   const d     = new Date(),
-  //         utc   = d.getTime() + (d.getTimezoneOffset() * 60000),
-  //         cTime = new Date(utc + (3600000 * -7));
-
-  //   console.log("checking if time is btw 11 and 12");
-  //   if (((dateFormat(cTime, "HH") >= 14) && (dateFormat(cTime, "HH") < 16)) && (!night)) {
-  //     console.log("time is working ===> ", dateFormat(cTime, "HH:MM:ss"));
-  //     night = true;
-  //     changeControlVar("night");
-  //   } 
-    
-  //   if ((dateFormat(cTime, "HH") > 15)) {
-  //     console.log("time is greater or equal to 15 ==> ", dateFormat(cTime, "HH:MM:ss"));
-  //     if (night){
-  //       console.log("night is ON but go to OFF");
-  //       changeControlVar("day");
-  //     }
-  //   }
-
+mainController = (v, interval = dayTime, night = false) => {
   mainFunc();
-  clearInterval(secondT);
-  setInterval(() => {
+  if (v) {
+    clearInterval(secondT);
+  }
+
+  controlVar = setInterval(() => {
+    const d       = new Date(),
+          utc     = d.getTime() + (d.getTimezoneOffset() * 60000),
+          cTime   = new Date(utc + (3600000 * -7));
+    
+    if (((dateFormat(cTime, "HH") >= 22)) && !night)
+      changeControlVar("night");
+    else if ((((dateFormat(cTime, "HH") >= 7)) && (dateFormat(cTime, "HH") <= 21)) && night)
+      changeControlVar("day");
+
     mainFunc();
   }, interval);
 }
@@ -170,11 +154,8 @@ fFifteen = () => {
           utc = d.getTime() + (d.getTimezoneOffset() * 60000),
           cTime = new Date(utc + (3600000 * -7));
 
-    console.log(`#15sec running @${dateFormat(cTime, "HH:MM:ss")}`);
-
     if (((dateFormat(cTime, "MM")) % 15) === 0) {
-      console.log("got FIFTEEN", dateFormat(cTime, "HH:MM:ss"));
-      mainController("day");
+      mainController(true);
     }
 
   }, (1000 * 60));
@@ -213,7 +194,9 @@ mainFunc();
 
 let firstT      = null,
     secondT     = null,
-    // controlVar  = null,
-    interval    = 1000 * 60 * 15;
+    controlVar  = null;
+
+const dayTime   = 1000 * 60 * 15,
+      nightTime = 1000 * 60 * 60;
 
 fZero();
