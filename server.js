@@ -7,6 +7,9 @@ const gMinPrice     = 1100,
       gMaxPrice     = 1350
       defaultRatio  = 0.7;
 
+const dayTime   = 1000 * 60 * 15,
+      nightTime = 1000 * 60 * 60 * 10;
+
 let beforeData    = null;
 
 const
@@ -110,7 +113,7 @@ mainFunc = async () => {
 // function to change the interval time, according to the curretn time
 // if between 22 - 6:59 the interval is one hour
 // if between 7 to 21:59, the interval is 15 minutes
-changeControlVar = (dayOrNight) => {
+changeInterval = (dayOrNight) => {
   clearInterval(controlVar);
   if (dayOrNight === "night") {
     mainController(false, nightTime, true);
@@ -124,9 +127,7 @@ changeControlVar = (dayOrNight) => {
 // it will run while the system still running because here is where is defined the intervals to check on craigslist
 mainController = (v, interval = dayTime, night = false) => {
   mainFunc();
-  if (v) {
-    clearInterval(secondT);
-  }
+  (v) ? clearInterval(secondT) : null;
 
   controlVar = setInterval(() => {
     const d       = new Date(),
@@ -134,11 +135,11 @@ mainController = (v, interval = dayTime, night = false) => {
           cTime   = new Date(utc + (3600000 * -7));
     
     if (((dateFormat(cTime, "HH") >= 22)) && !night)
-      changeControlVar("night");
-    else if ((((dateFormat(cTime, "HH") >= 7)) && (dateFormat(cTime, "HH") <= 21)) && night)
-      changeControlVar("day");
-
-    mainFunc();
+      changeInterval("night");
+    else if (night && (((dateFormat(cTime, "HH") >= 7)) && (dateFormat(cTime, "HH") <= 21)))
+      changeInterval("day");
+    else
+      mainFunc();
   }, interval);
 }
 
@@ -155,6 +156,7 @@ fFifteen = () => {
           cTime = new Date(utc + (3600000 * -7));
 
     if (((dateFormat(cTime, "MM")) % 15) === 0) {
+      console.log("got FIFTEEN", dateFormat(cTime, "HH:MM:ss"));
       mainController(true);
     }
 
@@ -173,12 +175,10 @@ fZero = () => {
           cTime = new Date(utc + (3600000 * -7));
 
     const t = dateFormat(cTime, "ss");
-    console.log("time = ", t);
 
     if (t === "00" || t === "01") {
       console.log("got ZERO", dateFormat(cTime, "HH:MM:ss"));
       fFifteen();
-
     }
   }, 1000);
 }
@@ -195,8 +195,5 @@ mainFunc();
 let firstT      = null,
     secondT     = null,
     controlVar  = null;
-
-const dayTime   = 1000 * 60 * 15,
-      nightTime = 1000 * 60 * 60;
 
 fZero();
