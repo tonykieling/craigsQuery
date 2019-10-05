@@ -32,39 +32,39 @@ const
       searchDistance  : generalOptions.searchDistance,
       minPrice        : generalOptions.minPrice,
       maxPrice        : generalOptions.maxPrice
+    },
+    {
+      name            : "Oakridge",
+      postal          : "V5Z4H2",
+      category        : generalOptions.category,
+      searchDistance  : generalOptions.searchDistance,
+      minPrice        : generalOptions.minPrice,
+      maxPrice        : generalOptions.maxPrice
+    },
+    {
+      name            : "MarineDrive",
+      postal          : "V5X0C7",
+      category        : generalOptions.category,
+      searchDistance  : generalOptions.searchDistance,
+      minPrice        : generalOptions.minPrice,
+      maxPrice        : generalOptions.maxPrice
+    },
+    {
+      name            : "KingEdward",
+      postal          : "V5Z2C4",
+      category        : generalOptions.category,
+      searchDistance  : generalOptions.searchDistance,
+      minPrice        : generalOptions.minPrice,
+      maxPrice        : generalOptions.maxPrice
+    },
+    {
+      name            : "CityHall",
+      postal          : "V5Z2V2",
+      category        : generalOptions.category,
+      searchDistance  : generalOptions.searchDistance,
+      minPrice        : generalOptions.minPrice,
+      maxPrice        : generalOptions.maxPrice
     }
-    // {
-    //   name            : "Oakridge",
-    //   postal          : "V5Z4H2",
-    //   category        : generalOptions.category,
-    //   searchDistance  : generalOptions.searchDistance,
-    //   minPrice        : generalOptions.minPrice,
-    //   maxPrice        : generalOptions.maxPrice
-    // },
-    // {
-    //   name            : "MarineDrive",
-    //   postal          : "V5X0C7",
-    //   category        : generalOptions.category,
-    //   searchDistance  : generalOptions.searchDistance,
-    //   minPrice        : generalOptions.minPrice,
-    //   maxPrice        : generalOptions.maxPrice
-    // },
-    // {
-    //   name            : "KingEdward",
-    //   postal          : "V5Z2C4",
-    //   category        : generalOptions.category,
-    //   searchDistance  : generalOptions.searchDistance,
-    //   minPrice        : generalOptions.minPrice,
-    //   maxPrice        : generalOptions.maxPrice
-    // },
-    // {
-    //   name            : "CityHall",
-    //   postal          : "V5Z2V2",
-    //   category        : generalOptions.category,
-    //   searchDistance  : generalOptions.searchDistance,
-    //   minPrice        : generalOptions.minPrice,
-    //   maxPrice        : generalOptions.maxPrice
-    // }
   ];
 
 
@@ -75,90 +75,12 @@ const
 // also, if the case, it call the function to send email - using mailgun
 mainFunc = async () => {
 
-  // const getList = await options.map(async item => {
-  //   const eachItem = await client.list(item);
-  //   eachItem["name"] = item.name;
-  //   return eachItem;
-  // });
-  // const list = await Promise.all(getList);
-
-  const list = [
-    [
-      {
-        category: 'vancouver.craigslist.org',
-        date: '2019-09-06 21:20',
-        hasPic: false,
-        location: '(Olympic Village / False Creekpm)',
-        pid: '6971490453',
-        price: '$1200',
-        title: 'Rental Agent - Helping You Get The Perfect Rental',
-        url: 'https://vancouver.craigslist.org/van/apa/d/vancouver-rental-agent-helping-you-get/6971490453.html'
-      },
-      {
-        category: 'vancouver.craigslist.org',
-        date: '2019-10-04 03:26',
-        hasPic: false,
-        location: '(vancouver)',
-        pid: '6990899318',
-        price: '$13000000',
-        title: 'Vancouver furnished condo',
-        url: 'https://vancouver.craigslist.org/van/apa/d/vancouver-vancouver-furnished-condo/6990899318.html'
-      },
-      {
-        category: 'vancouver.craigslist.org',
-        date: '2019-09-21 15:08',
-        hasPic: false,
-        location: '(Abbotsford)',
-        pid: '6983779607',
-        price: '$1200',
-        title: 'WOW 2 bedroom + den available Oct 1st',
-        url: 'https://vancouver.craigslist.org/pml/apa/d/wow-2-bedroom-den-available-oct-1st/6983779607.html'
-      }
-    ]
-  ];
-  list.name = "Langara";
-
-  beforeData = 
-  [
-    [
-      {
-        category: 'vancouver.craigslist.org',
-        date: '2019-09-06 21:20',
-        hasPic: false,
-        location: '(Olympic Village / False Creekpm)',
-        pid: '6971490453',
-        price: '$1200',
-        title: 'Rental Agent - Helping You Get The Perfect Rental',
-        url: 'https://vancouver.craigslist.org/van/apa/d/vancouver-rental-agent-helping-you-get/6971490453.html'
-      },
-      {
-        category: 'vancouver.craigslist.org',
-        date: '2019-10-04 03:26',
-        hasPic: false,
-        location: '(vancouver)',
-        pid: '6990899318',
-        price: '$1300',
-        title: 'Vancouver furnished condo',
-        url: 'https://vancouver.craigslist.org/van/apa/d/vancouver-vancouver-furnished-condo/6990899318.html'
-      },
-      {
-        category: 'vancouver.craigslist.org',
-        date: '2019-09-21 15:08',
-        hasPic: false,
-        location: '(Abbotsford)',
-        pid: '698377960700000',
-        price: '$1200',
-        title: 'WOW 2 bedroom + den available Oct 1st',
-        url: 'https://vancouver.craigslist.org/pml/apa/d/wow-2-bedroom-den-available-oct-1st/6983779607.html'
-      },
-    ]
-  ];
-  beforeData.name = "Langara";
-
-  console.log("list##############\n", list);
-  console.log("BEFORE\n", beforeData);
-  console.log("LIST\n", list);
-  // return;
+  const getList = await options.map(async item => {
+    const eachItem = await client.list(item);
+    eachItem["name"] = item.name;
+    return eachItem;
+  });
+  const list = await Promise.all(getList);
 
   if (!beforeData){
     // first time the system runs it send the email with the received data from craigslist
@@ -195,16 +117,16 @@ mainFunc = async () => {
 changeInterval = (dayOrNight) => {
   clearInterval(controlVar);
   if (dayOrNight === "night") {
-    mainController(false, nightTime, true);
+    mainController(false, nightTime);
   } else if (dayTime === "day")
-    mainController(false, dayTime, false);
+    mainController(false, dayTime);
     
 }
 
 
 // this is the main time controller of the application
 // it will run while the system still running because here is where is defined the intervals to check on craigslist
-mainController = (v, interval = dayTime, night = false) => {
+mainController = (v, interval = dayTime) => {
   mainFunc();
   (v) ? clearInterval(secondT) : null;
 
@@ -213,9 +135,9 @@ mainController = (v, interval = dayTime, night = false) => {
           utc     = d.getTime() + (d.getTimezoneOffset() * 60000),
           cTime   = new Date(utc + (3600000 * -7));
     
-    if (((dateFormat(cTime, "HH") >= 21)) && !night)
+    if ((dateFormat(cTime, "HH") >= 21) || ((dateFormat(cTime, "HH") <= 6)))
       changeInterval("night");
-    else if (night && (((dateFormat(cTime, "HH") >= 6)) && (dateFormat(cTime, "HH") <= 21)))
+    else if (((dateFormat(cTime, "HH") >= 6)) && (dateFormat(cTime, "HH") <= 21))
       changeInterval("day");
     else
       mainFunc();
