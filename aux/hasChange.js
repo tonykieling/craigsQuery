@@ -18,8 +18,8 @@ hasChange = (before, current) => {
               } else {
                 countC += 1;
                 if (countC === b.length) {
-                  someChange      = true;
                   objC.modify     = "New";
+                  someChange      = true;
                   break;
                 }
               }
