@@ -1,25 +1,26 @@
-// https://www.npmjs.com/package/node-craigslist
-// dotenv
-// mailgun
+const { hasChange }           = require("./aux/hasChange.js");
+const { formatDataToBeSent }  = require("./aux/formatDataToBeSent.js");
 
-const dateFormat = require('dateformat');
-const ejs = require('ejs');
-require("dotenv").config();
-const mailgun = require("mailgun-js");
+const dateFormat  = require('dateformat');
 
-const mg = mailgun({apiKey: process.env.APIKEY, domain: process.env.DOMAIN});
-const gMinPrice                 = 1100;
-const gMaxPrice                 = 1350;
+const gMinPrice     = 1100,
+      gMaxPrice     = 1350
+      defaultRatio  = 0.7;
 
-let beforeData = null;
+const dayTime   = 1000 * 60 * 15,
+      nightTime = 1000 * 60 * 60 * 10;
+
+let beforeData    = null;
+
+
 const
-  craigslist = require('node-craigslist'),
-  client = new craigslist.Client({
+  craigslist      = require('node-craigslist'),
+  client          = new craigslist.Client({
     city : 'vancouver',
   }),
-  generalOptions = {
+  generalOptions  = {   // they are shared for all objects that will be queried
       category        : "apa",
-      searchDistance  : 1,
+      searchDistance  : defaultRatio,
       minPrice        : gMinPrice,
       maxPrice        : gMaxPrice
   }
@@ -68,104 +69,11 @@ const
 
 
 
-// this function only checks whether the data before and current are the same
-// if so, the system may not send the email because nothing has changed
-hasChange = (before, current) => {
-  let someChange = false;
-  let internalChange = false;
-  for (let c of current)
-    for (let b of before)
-      if (b.name === c.name) {
-        for (let objC of c) {
-          let countC = 0;
-          for (let objB of b) {
-            if (objB.pid === objC.pid) {
-              objB.flag = true;
-              if (objB.price !== objC.price) {
-                objC.modify     = "Changed";
-                someChange       = true;
-                internalChange  = true;
-              }
-              break;
-            } else {
-              countC += 1;
-              if (countC === b.length) {
-                someChange       = true;
-                objC.modify     = "New";
-                internalChange  = true;
-                break;
-              }
-            }
-          }
-        }
-        if (internalChange)
-          for (let objB of b)
-            if (!objB.flag) {
-              objB.modify = "Deleted";
-              someChange   = true;
-              c.push(objB);
-            }
-      }
-  return(someChange && current);
-}
-
-
-
-// function to send email using MailGun
-sendEmail = (content, subject) => {
-  const data = {
-    from    : "Mailgun Sandbox <postmaster@sandbox002b4d3efa304a4a92fa6ba15da0460f.mailgun.org>",
-    to      : process.env.TO,
-    cc      : process.env.CC,
-    subject,
-    html    : content
-    // text    : content
-  };
-  
-  mg.messages().send(data, function (error, body) {
-    console.log("body", body.message);
-  });  
-}
-
-
-
-// it formats the data to be sent by the email function
-formatDataToBeSent = (list, flag) => {
-  ejs.renderFile("./formatHTML.ejs", {list, gMinPrice, gMaxPrice}, options, function(err, result){
-    if (err)
-      console.log("### err", err);
-    else {
-      let subject = "";
-
-      const d = new Date();
-      const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
-      const nd = new Date(utc + (3600000*-7));
-
-
-      switch(flag) {
-        case "first":
-          subject = `${dateFormat(nd, "@HH:MM - dddd  -  mm/dd/yyyy")}`;
-          break;
-        case "new":
-          subject = `NEW ${dateFormat(nd, "@HH:MM - dddd  -  mm/dd/yyyy")}`;
-          break;
-        case "same":
-          subject = `same ${dateFormat(nd, "@HH:MM - dddd  -  mm/dd/yyyy")}`;
-          break;
-        default:
-          subject = flag;
-          break;
-      }
-      sendEmail(result, subject);
-    }
-  });
-}
-
-
-
 // main function of the system
+// this function that queries craigslist
+// it calls an auxiliary function to check if there is change between the last query and the current one
+// also, if the case, it call the function to send email - using mailgun
 mainFunc = async () => {
-  console.log("@mainFunc");
 
   const getList = await options.map(async item => {
     const eachItem = await client.list(item);
@@ -178,28 +86,24 @@ mainFunc = async () => {
     // first time the system runs it send the email with the received data from craigslist
     console.log("FIRST TIME");
     const flag = "first";
-    formatDataToBeSent(list, flag);
+    formatDataToBeSent(list, flag, gMinPrice, gMaxPrice);
 
   } else {
     // it calls a function to compare list and beforeData, if there are changes
     // if they are diff, the system send the email
-    // const cTime = new Date();
-    const d = new Date();
-    const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
-    const cTime = new Date(utc + (3600000 * -7));
+    const d = new Date(),
+          utc = d.getTime() + (d.getTimezoneOffset() * 60000),
+          cTime = new Date(utc + (3600000 * -7));
 
     const queryToHasChange = await hasChange(beforeData, list);
-    if (queryToHasChange){
-      console.log(" diff data!!!!!!! => ", dateFormat(cTime, "HH:MM"));
-      const flag = "new";
-      formatDataToBeSent(list, flag);
-    // } else if ((Number(dateFormat(cTime, "HH")) === 8  && (Number(dateFormat(cTime, "MM"))) === 30) ||
-    //           ((Number(dateFormat(cTime, "HH")) === 19 && (Number(dateFormat(cTime, "MM"))) === 45))) {
-    //   console.log("+++ GOGOGOGO @", dateFormat(cTime, "HH:MM"));
-    //   const flag = "same" + dateFormat(cTime, "@HH:MM - dddd  -  mm/dd/yyyy");
-    //   formatDataToBeSent(list, flag);        
-    } else
+
+    if (await queryToHasChange){
+      console.log(" ==> diff data!! - ", dateFormat(cTime, "HH:MM"));
+      formatDataToBeSent(list);
+    } else {
       console.log(" no changes => ", dateFormat(cTime, "HH:MM"));
+      return;
+    }
   }
 
   beforeData = null;
@@ -207,28 +111,36 @@ mainFunc = async () => {
 }
 
 
+// function to change the interval time, according to the curretn time
+// if between 22 - 6:59 the interval is one hour
+// if between 7 to 21:59, the interval is 15 minutes
+changeInterval = (dayOrNight) => {
+  clearInterval(controlVar);
+  if (dayOrNight === "night") {
+    mainController(false, nightTime);
+  } else if (dayTime === "day")
+    mainController(false, dayTime);
+    
+}
 
-mainController = () => {
-  // this is the time controller of the application
-  console.log("@inside mainController");
+
+// this is the main time controller of the application
+// it will run while the system still running because here is where is defined the intervals to check on craigslist
+mainController = (v, interval = dayTime) => {
   mainFunc();
-  clearInterval(secondT);
-  const timeDay   = 1000 * 60 * 15;
-  const timeNight = 1000 * 60 * 30;
-  let interval    = timeDay;
-  setInterval(() => {
-    const d = new Date();
-    const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
-    const currentTime = new Date(utc + (3600000 * -7));
+  (v) ? clearInterval(secondT) : null;
 
-    console.log(`# running @${dateFormat(currentTime, "HH:MM:ss")}`);
-    if (Number(dateFormat(currentTime, "HH")) > 6 &&
-        (Number(dateFormat(currentTime, "HH")) < 22))
-      interval = timeDay;
+  controlVar = setInterval(() => {
+    const d       = new Date(),
+          utc     = d.getTime() + (d.getTimezoneOffset() * 60000),
+          cTime   = new Date(utc + (3600000 * -7));
+    
+    if ((dateFormat(cTime, "HH") >= 21) || ((dateFormat(cTime, "HH") <= 6)))
+      changeInterval("night");
+    else if (((dateFormat(cTime, "HH") >= 6)) && (dateFormat(cTime, "HH") <= 21))
+      changeInterval("day");
     else
-      interval = timeNight;
-
-    mainFunc();
+      mainFunc();
   }, interval);
 }
 
@@ -238,18 +150,17 @@ mainController = () => {
 // this is the function to round the timer to multiple of 15 minutes
 // it's gonna be executed only once
 fFifteen = () => {
-  console.log("@inside fFifteen")
   clearInterval(firstT);
   secondT = setInterval(() => {
-    const cTime = Number(dateFormat(new Date(), "MM"));
+    const d = new Date(),
+          utc = d.getTime() + (d.getTimezoneOffset() * 60000),
+          cTime = new Date(utc + (3600000 * -7));
 
-    // const d = new Date();
-    // const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
-    // const cTime = Number(dateFormat(new Date(utc + (3600000 * -7)), "MM"));
+    if (((dateFormat(cTime, "MM")) % 15) === 0) {
+      console.log("got FIFTEEN", dateFormat(cTime, "HH:MM:ss"));
+      mainController(true);
+    }
 
-    console.log(`#15sec running @${cTime}`);
-    if ((cTime % 15) === 0)
-      mainController();
   }, (1000 * 60));
 }
 
@@ -259,16 +170,15 @@ fFifteen = () => {
 // it will be trigged when the timer gets 0 seconds in order to start each fifteen iterarion at zero seconds
 // it's gonna be executed only once
 fZero = () => {
-  console.log("@inside fZero");
   firstT = setInterval(() => {
-    const t = Number(dateFormat(new Date(), "ss"));
-    // const d = new Date();
-    // const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
-    // const t = Number(dateFormat(new Date(utc + (3600000 * -7)), "ss"));
+    const d = new Date(),
+          utc = d.getTime() + (d.getTimezoneOffset() * 60000),
+          cTime = new Date(utc + (3600000 * -7));
 
-    console.log("time = ", t);
-    if (t === 59 || t === 0) {
-      console.log("0000", dateFormat(t, "HH:MM"));
+    const t = dateFormat(cTime, "ss");
+
+    if (t === "00" || t === "01") {
+      console.log("got ZERO", dateFormat(cTime, "HH:MM:ss"));
       fFifteen();
     }
   }, 1000);
@@ -277,8 +187,14 @@ fZero = () => {
 
 // it runs at the very beggining to send the first email
 // it runs only once
-console.log(`# 1111running @${dateFormat(new Date(), "HH:MM:ss")}`);
+const d = new Date(),
+      utc = d.getTime() + (d.getTimezoneOffset() * 60000),
+      cTime = new Date(utc + (3600000 * -7));
+console.log(`# first running @${dateFormat(cTime, "HH:MM:ss")}`);
 mainFunc();
-let firstT  = null;
-let secondT = null;
+
+let firstT      = null,
+    secondT     = null,
+    controlVar  = null;
+
 fZero();

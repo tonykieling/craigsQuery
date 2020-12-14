@@ -52,26 +52,29 @@
                     </td>
                     <td colspan="1" class="bodySetting">
                       <h3 style="color: orange">Changed</h3>
+                      <h3 style="color: orange">PID: <%= itemArray[objk].pid %></h3>
                   <% } else if (itemArray[objk].modify === "Deleted") { %>
                     <td colspan="1" class="bodySetting">
                       <h3 style="color: red">Item: <%= Number(objk) + 1 %></h3>
                     </td>
                     <td colspan="1" class="bodySetting">
                       <h3 style="color: red">Deleted</h3>
+                      <h3 style="color: red">PID: <%= itemArray[objk].pid %></h3>
                   <% } else if (itemArray[objk].modify === "New") { %>
                     <td colspan="1" class="bodySetting">
                       <h3 style="color: lime">Item: <%= Number(objk) + 1 %></h3>
                     </td>
                     <td colspan="1" class="bodySetting">
                       <h3 style="color: lime">NEW</h3>
+                      <h3 style="color: lime">PID: <%= itemArray[objk].pid %></h3>
                   <% } else { %>
                     <td colspan="1" class="bodySetting">
                       <h3 style="color: black">Item: <%= Number(objk) + 1 %></h3>
                     </td>
                     <td colspan="1" class="bodySetting">
+                      <h3 style="color: black">PID: <%= itemArray[objk].pid %></h3>
                   <% } %>
 
-                    <h3>PID: <%= itemArray[objk].pid %></h3>
                   </td>                  
 
                   <td colspan="1" class="bodySetting">
