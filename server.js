@@ -3,7 +3,7 @@
 // mailgun
 
 const dateFormat = require('dateformat');
-let ejs = require('ejs');
+const ejs = require('ejs');
 require("dotenv").config();
 const mailgun = require("mailgun-js");
 
